@@ -1,0 +1,200 @@
+/* static/css/style.css */
+
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* شريط التنقل */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* القسم الرئيسي */
+.hero-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.feature-item {
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
+.feature-item i {
+    margin-left: 10px;
+}
+
+/* بطاقات الإحصائيات */
+.stats-section {
+    background-color: #f8f9fa;
+    padding: 60px 0;
+}
+
+.stat-card {
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.1);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-10px);
+}
+
+.stats-card {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.1);
+    transition: all 0.3s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+/* البطاقات العامة */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.1);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 2px solid #f0f0f0;
+    font-weight: bold;
+}
+
+/* الجداول */
+.table th {
+    border-top: none;
+    font-weight: bold;
+    color: #495057;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* الشارات */
+.badge {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+.badge.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--secondary-color) !important;
+}
+
+/* أزرار */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* شريط التقدم */
+.progress {
+    height: 25px;
+    border-radius: 12px;
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+    line-height: 25px;
+    font-size: 14px;
+}
+
+/* تنسيقات إضافية */
+.summary-text {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.word-cloud {
+    min-height: 300px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* تحسينات للغة العربية */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    text-align: right;
+}
+
+.modal-header .close {
+    margin: -1rem auto -1rem -1rem;
+}
+
+/* استجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .stats-card {
+        margin-bottom: 15px;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
+
+/* تأثيرات حركية */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}

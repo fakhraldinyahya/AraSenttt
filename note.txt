@@ -1,0 +1,7 @@
+python -m notebook
+
+env\Scripts\activate
+
+
+python -m notebook
+

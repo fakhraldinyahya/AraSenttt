@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AraSent - لوحة التحكم</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .stats-card {
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .stats-card i { font-size: 48px; opacity: 0.8; }
+        .bg-positive { background: linear-gradient(135deg, #28a745, #20c997); }
+        .bg-negative { background: linear-gradient(135deg, #dc3545, #e74c3c); }
+        .bg-neutral { background: linear-gradient(135deg, #6c757d, #95a5a6); }
+        .bg-total { background: linear-gradient(135deg, #007bff, #00bcd4); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-chart-line"></i> AraSent</a>
+            <div class="navbar-nav me-auto">
+                <a class="nav-link" href="/">الرئيسية</a>
+                <a class="nav-link" href="/upload">رفع ملف</a>
+                <a class="nav-link active" href="#">لوحة التحكم</a>
+                <a class="nav-link" href="/summary/{{ filename }}" id="summaryLink">الملخص</a>
+            </div>
+            <a href="/download/{{ filename }}" class="btn btn-light" id="downloadBtn">
+                <i class="fas fa-download"></i> تحميل النتائج
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4"><i class="fas fa-chart-pie"></i> لوحة تحليل المشاعر</h1>
+            </div>
+        </div>
+
+        <!-- بطاقات الإحصائيات -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card bg-total">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>إجمالي التقييمات</h6>
+                            <h2 class="mb-0" id="totalReviews">0</h2>
+                        </div>
+                        <i class="fas fa-comments"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card bg-positive">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>إيجابي</h6>
+                            <h2 class="mb-0" id="positiveCount">0</h2>
+                        </div>
+                        <i class="fas fa-smile"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card bg-negative">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>سلبي</h6>
+                            <h2 class="mb-0" id="negativeCount">0</h2>
+                        </div>
+                        <i class="fas fa-frown"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card bg-neutral">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>محايد</h6>
+                            <h2 class="mb-0" id="neutralCount">0</h2>
+                        </div>
+                        <i class="fas fa-meh"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الرسوم البيانية -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> توزيع المشاعر العام</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="sentimentChart" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> تحليل الجوانب</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="aspectChart" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- جدول التقييمات -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-table"></i> التقييمات المحللة</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>النص الأصلي</th>
+                                        <th>المشاعر</th>
+                                        <th>الجوانب</th>
+                                        <th>الثقة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reviewsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`/analyze/{{ filename }}`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (!data.success) throw new Error(data.error);
+                
+                const stats = data.stats;
+                document.getElementById('totalReviews').textContent = stats.total_reviews;
+                document.getElementById('positiveCount').textContent = stats.sentiment_distribution['إيجابي'] || 0;
+                document.getElementById('negativeCount').textContent = stats.sentiment_distribution['سلبي'] || 0;
+                document.getElementById('neutralCount').textContent = stats.sentiment_distribution['محايد'] || 0;
+                
+                // رسم بياني للمشاعر
+                const sentimentData = [{
+                    values: [stats.sentiment_distribution['إيجابي'], stats.sentiment_distribution['سلبي'], stats.sentiment_distribution['محايد']],
+                    labels: ['إيجابي 😊', 'سلبي 😞', 'محايد 😐'],
+                    type: 'pie',
+                    marker: { colors: ['#28a745', '#dc3545', '#6c757d'] },
+                    textinfo: 'label+percent',
+                    hoverinfo: 'label+value+percent'
+                }];
+                
+                Plotly.newPlot('sentimentChart', sentimentData, {
+                    title: 'توزيع المشاعر',
+                    showlegend: true,
+                    height: 400
+                });
+                
+                // عرض التقييمات
+                const tableBody = document.getElementById('reviewsTableBody');
+                data.results.forEach(review => {
+                    const row = tableBody.insertRow();
+                    const sentimentClass = review.overall_sentiment === 'إيجابي' ? 'success' : 
+                                          review.overall_sentiment === 'سلبي' ? 'danger' : 'secondary';
+                    
+                    const aspectsText = review.aspects.map(a => a.aspect).join(', ') || 'لا يوجد';
+                    
+                    row.innerHTML = `
+                        <td>${review.original_text.substring(0, 100)}${review.original_text.length > 100 ? '...' : ''}</td>
+                        <td><span class="badge bg-${sentimentClass}">${review.overall_sentiment}</span></td>
+                        <td><small>${aspectsText}</small></td>
+                        <td>${(review.confidence * 100).toFixed(1)}%</td>
+                    `;
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.body.innerHTML += `<div class="alert alert-danger">حدث خطأ: ${error.message}</div>`;
+            }
+        }
+        
+        loadDashboard();
+        drawAspectChart(reviews);
+
+
+
+
+
+
+        // دالة لرسم تحليل الجوانب
+function drawAspectChart(reviews) {
+    // قائمة الجوانب المحتملة
+    const aspectsList = ['الطعام', 'الخدمة', 'السعر', 'الأجواء', 'النظافة', 'الموقع', 'التوصيل'];
+    
+    // تهيئة إحصائيات الجوانب
+    const aspectStats = {};
+    aspectsList.forEach(aspect => {
+        aspectStats[aspect] = { 'إيجابي': 0, 'سلبي': 0, 'محايد': 0 };
+    });
+    
+    // تجميع الإحصائيات من التقييمات
+    reviews.forEach(review => {
+        if (review.aspects && review.aspects.length > 0) {
+            review.aspects.forEach(aspectItem => {
+                const aspect = aspectItem.aspect;
+                const sentiment = aspectItem.sentiment;
+                
+                // البحث عن الجانب في القائمة
+                for (const key in aspectStats) {
+                    if (aspect.includes(key) || key.includes(aspect)) {
+                        if (sentiment === 'إيجابي') aspectStats[key]['إيجابي']++;
+                        else if (sentiment === 'سلبي') aspectStats[key]['سلبي']++;
+                        else if (sentiment === 'محايد') aspectStats[key]['محايد']++;
+                        break;
+                    }
+                }
+            });
+        }
+    });
+    
+    // تجهيز البيانات للرسم البياني
+    const aspects = Object.keys(aspectStats);
+    const positiveData = aspects.map(a => aspectStats[a]['إيجابي']);
+    const negativeData = aspects.map(a => aspectStats[a]['سلبي']);
+    const neutralData = aspects.map(a => aspectStats[a]['محايد']);
+    
+    // إنشاء الرسم البياني
+    const aspectTrace1 = {
+        x: aspects,
+        y: positiveData,
+        name: 'إيجابي',
+        type: 'bar',
+        marker: { color: '#28a745' },
+        text: positiveData.map(v => v + ' تقييم'),
+        textposition: 'auto',
+    };
+    
+    const aspectTrace2 = {
+        x: aspects,
+        y: negativeData,
+        name: 'سلبي',
+        type: 'bar',
+        marker: { color: '#dc3545' },
+        text: negativeData.map(v => v + ' تقييم'),
+        textposition: 'auto',
+    };
+    
+    const aspectTrace3 = {
+        x: aspects,
+        y: neutralData,
+        name: 'محايد',
+        type: 'bar',
+        marker: { color: '#6c757d' },
+        text: neutralData.map(v => v + ' تقييم'),
+        textposition: 'auto',
+    };
+    
+    const aspectLayout = {
+        title: 'توزيع المشاعر حسب الجوانب',
+        xaxis: { title: 'الجوانب', tickangle: -45 },
+        yaxis: { title: 'عدد التقييمات' },
+        barmode: 'group',
+        hovermode: 'x',
+        showlegend: true,
+        legend: { orientation: 'h', y: -0.2 },
+        margin: { b: 100, t: 50, l: 60, r: 20 },
+        height: 400,
+        font: { family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif' }
+    };
+    
+    Plotly.newPlot('aspectChart', [aspectTrace1, aspectTrace2, aspectTrace3], aspectLayout);
+}
+
+// دالة محدثة لتحميل لوحة التحكم كاملة (مع إضافة رسم الجوانب)
+async function loadDashboard() {
+    try {
+        const response = await fetch(`/analyze/{{ filename }}`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (!data.success) throw new Error(data.error);
+        
+        const stats = data.stats;
+        const reviews = data.results;
+        
+        // تحديث الإحصائيات
+        document.getElementById('totalReviews').textContent = stats.total_reviews;
+        document.getElementById('positiveCount').textContent = stats.sentiment_distribution['إيجابي'] || 0;
+        document.getElementById('negativeCount').textContent = stats.sentiment_distribution['سلبي'] || 0;
+        document.getElementById('neutralCount').textContent = stats.sentiment_distribution['محايد'] || 0;
+        
+        // رسم مخطط المشاعر
+        const sentimentData = [{
+            values: [stats.sentiment_distribution['إيجابي'], stats.sentiment_distribution['سلبي'], stats.sentiment_distribution['محايد']],
+            labels: ['إيجابي 😊', 'سلبي 😞', 'محايد 😐'],
+            type: 'pie',
+            marker: { colors: ['#28a745', '#dc3545', '#6c757d'] },
+            textinfo: 'label+percent',
+            hoverinfo: 'label+value+percent'
+        }];
+        
+        Plotly.newPlot('sentimentChart', sentimentData, {
+            title: 'توزيع المشاعر',
+            showlegend: true,
+            height: 400,
+            font: { family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif' }
+        });
+        
+        // رسم مخطط الجوانب
+        drawAspectChart(reviews);
+        
+        // عرض التقييمات في الجدول
+        const tableBody = document.getElementById('reviewsTableBody');
+        tableBody.innerHTML = ''; // تنظيف الجدول
+        
+        reviews.forEach(review => {
+            const row = tableBody.insertRow();
+            const sentimentClass = review.overall_sentiment === 'إيجابي' ? 'success' : 
+                                  review.overall_sentiment === 'سلبي' ? 'danger' : 'secondary';
+            
+            const aspectsText = review.aspects.map(a => `${a.aspect} (${a.sentiment})`).join(', ') || 'لا يوجد جوانب';
+            
+            row.innerHTML = `
+                <td>${review.original_text.substring(0, 100)}${review.original_text.length > 100 ? '...' : ''}</td>
+                <td><span class="badge bg-${sentimentClass}">${review.overall_sentiment}</span></td>
+                <td><small>${aspectsText}</small></td>
+                <td>${(review.confidence * 100).toFixed(1)}%</td>
+            `;
+        });
+        
+    } catch (error) {
+        console.error('Error:', error);
+        document.body.innerHTML += `<div class="alert alert-danger">حدث خطأ: ${error.message}</div>`;
+    }
+}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
