@@ -1,143 +1,139 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AraSent - الملخص</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .summary-card {
-            border-radius: 20px;
-            padding: 30px;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .stat-circle {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 36px;
-            font-weight: bold;
-            color: white;
-        }
-        .bg-positive { background: linear-gradient(135deg, #28a745, #20c997); }
-        .bg-negative { background: linear-gradient(135deg, #dc3545, #e74c3c); }
-        .bg-neutral { background: linear-gradient(135deg, #6c757d, #95a5a6); }
-        .recommendation-item {
-            padding: 15px;
-            border-right: 4px solid;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        .recommendation-positive { border-right-color: #28a745; }
-        .recommendation-negative { border-right-color: #dc3545; }
-        .recommendation-neutral { border-right-color: #6c757d; }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/"><i class="fas fa-chart-line"></i> AraSent</a>
-            <div class="navbar-nav me-auto">
-                <a class="nav-link" href="/">الرئيسية</a>
-                <a class="nav-link" href="/upload">رفع ملف</a>
-                <a class="nav-link" href="/dashboard/{{ filename }}">لوحة التحكم</a>
-                <a class="nav-link active" href="#">الملخص</a>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <div class="container py-5">
-        {% if error %}
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle"></i> {{ error }}
-        </div>
-        {% else %}
-        
-        <div class="summary-card">
-            <div class="text-center mb-5">
-                <h1 class="display-4"><i class="fas fa-file-alt text-primary"></i> ملخص التحليل</h1>
-                <p class="lead">تم تحليل {{ total_reviews }} تقييم</p>
-            </div>
-            
-            <div class="row mb-5">
-                <div class="col-md-4">
-                    <div class="stat-circle bg-positive mx-auto">
-                        {{ positive_count }}
-                    </div>
-                    <h4 class="text-center text-success">تقييمات إيجابية</h4>
-                    <h2 class="text-center">{{ positive_pct }}%</h2>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-circle bg-negative mx-auto">
-                        {{ negative_count }}
-                    </div>
-                    <h4 class="text-center text-danger">تقييمات سلبية</h4>
-                    <h2 class="text-center">{{ negative_pct }}%</h2>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-circle bg-neutral mx-auto">
-                        {{ neutral_count }}
-                    </div>
-                    <h4 class="text-center text-secondary">تقييمات محايدة</h4>
-                    <h2 class="text-center">{{ neutral_pct }}%</h2>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-12">
-                    <h3 class="mb-4"><i class="fas fa-lightbulb text-warning"></i> التوصيات</h3>
-                    
-                    {% if positive_pct > 70 %}
-                    <div class="recommendation-item recommendation-positive">
-                        <i class="fas fa-trophy text-success"></i>
-                        <strong>أداء ممتاز!</strong> نسبة الرضا عالية جداً. حافظ على مستوى الخدمة الحالي.
-                    </div>
-                    {% endif %}
-                    
-                    {% if negative_pct > 30 %}
-                    <div class="recommendation-item recommendation-negative">
-                        <i class="fas fa-exclamation-triangle text-danger"></i>
-                        <strong>تنبيه!</strong> نسبة التقييمات السلبية مرتفعة. ينصح بمراجعة جودة الخدمة والطعام.
-                    </div>
-                    {% endif %}
-                    
-                    {% if neutral_pct > 40 %}
-                    <div class="recommendation-item recommendation-neutral">
-                        <i class="fas fa-meh text-secondary"></i>
-                        <strong>ملاحظة:</strong> هناك نسبة كبيرة من التقييمات المحايدة. حاول تحسين تجربة العملاء لكسب تقييمات إيجابية.
-                    </div>
-                    {% endif %}
-                    
-                    <div class="recommendation-item recommendation-positive">
-                        <i class="fas fa-chart-line text-primary"></i>
-                        <strong>نصيحة:</strong> ركز على تحسين الجوانب الأكثر ذكراً في التقييمات السلبية.
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row mt-5">
-                <div class="col-12 text-center">
-                    <a href="/dashboard/{{ filename }}" class="btn btn-primary btn-lg mx-2">
-                        <i class="fas fa-chart-pie"></i> عرض لوحة التحكم
-                    </a>
-                    <a href="/download/{{ filename }}" class="btn btn-success btn-lg mx-2">
-                        <i class="fas fa-download"></i> تحميل التقرير الكامل
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        {% endif %}
+{% block title %}AraSent - الملخص التنفيذي والنتائج التحليلية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .summary-header {
+        background: #fff;
+        border-radius: 20px;
+        padding: 60px 40px;
+    }
+
+    .stat-ring {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        border: 6px solid #f8f9fa;
+        background: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    {% if error %}
+    <div class="card p-5 text-center border-0 shadow-sm fade-in">
+        <i class="fas fa-exclamation-circle fa-4xl text-danger mb-4"></i>
+        <h2 class="fw-bold">عذراً، حدث خطأ</h2>
+        <p class="text-muted">{{ error }}</p>
+        <a href="/upload" class="btn btn-primary mt-3 px-4 py-2 fw-bold">العودة للرفع</a>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    {% else %}
+
+    <div class="summary-header shadow-sm fade-in mb-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 mb-3 rounded-pill fw-bold">التقرير
+                التنفيذي الذكي</span>
+            <h1 class="display-4 fw-800 text-primary mb-3">ملخص الأداء العام</h1>
+            <p class="lead text-muted">بناءً على تحليل <span class="fw-bold text-dark fs-4">{{ total_reviews }}</span>
+                تقييم حقيقي</p>
+        </div>
+
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="stat-ring border-success" style="border-color: #e6f4ea !important;">
+                    <h2 class="fw-800 text-success mb-0">{{ positive_pct }}%</h2>
+                    <small class="text-muted fw-bold">إيجابي</small>
+                </div>
+                <h5 class="fw-bold text-success">مستوى رضا عالٍ</h5>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-ring border-danger" style="border-color: #fce8e6 !important;">
+                    <h2 class="fw-800 text-danger mb-0">{{ negative_pct }}%</h2>
+                    <small class="text-muted fw-bold">سلبي</small>
+                </div>
+                <h5 class="fw-bold text-danger">نقاط تستحق الاهتمام</h5>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-ring border-warning" style="border-color: #fef7e0 !important;">
+                    <h2 class="fw-800 text-warning mb-0">{{ neutral_pct }}%</h2>
+                    <small class="text-muted fw-bold">محايد</small>
+                </div>
+                <h5 class="fw-bold text-warning">فرص للتطوير</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-8 fade-in" style="animation-delay: 0.1s;">
+            <div class="card p-5 h-100 shadow-sm border-0">
+                <h3 class="fw-bold mb-4 text-primary border-bottom pb-3"><i class="fas fa-magic me-2"></i> الرؤى
+                    المستخرجة آلياً</h3>
+
+                <div class="d-flex mb-5">
+                    <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded-4"
+                        style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-trophy text-success fa-lg"></i>
+                    </div>
+                    <div class="ms-4">
+                        <h5 class="fw-bold">لماذا يحبك عملائك؟</h5>
+                        <p class="text-muted mb-0">تشير النتائج الإيجابية إلى تفوق واضح في الجوانب الأكثر ذكراً. هذه هي
+                            ميزتك التنافسية التي يجب أن تبني عليها حملاتك التسويقية القادمة.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-5">
+                    <div class="flex-shrink-0 bg-danger bg-opacity-10 p-3 rounded-4"
+                        style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-exclamation-circle text-danger fa-lg"></i>
+                    </div>
+                    <div class="ms-4">
+                        <h5 class="fw-bold">أين يكمن الخلل؟</h5>
+                        <p class="text-muted mb-0">التقييمات السلبية تركز على نقاط معينة. يوضح تحليل ABSA في لوحة التحكم
+                            الأسباب الدقيقة لخيبة أمل العملاء، مما يسهل عملية الإصلاح.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex">
+                    <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-4"
+                        style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-rocket text-primary fa-lg"></i>
+                    </div>
+                    <div class="ms-4">
+                        <h5 class="fw-bold">خطة النمو المقترحة</h5>
+                        <p class="text-muted mb-0">استناداً إلى المشاعر المحايدة، هناك فئة كبيرة من العملاء "مترددين".
+                            تحويل 10% فقط منهم إلى إيجابيين كفيل بمضاعفة أرباحك السنوية.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 fade-in" style="animation-delay: 0.2s;">
+            <div
+                class="card p-5 h-100 bg-primary text-white border-0 shadow-lg text-center d-flex flex-column justify-content-center">
+                <div class="mb-4">
+                    <i class="fas fa-file-pdf fa-4x opacity-50"></i>
+                </div>
+                <h4 class="fw-bold mb-4">تقرير جاهز لاتخاذ القرار</h4>
+                <p class="opacity-90 mb-5">تم استخراج هذا الملخص باستخدام أحدث نماذج معالجة اللغة الطبيعية (NLP)
+                    المتخصصة في النصوص العربية.</p>
+                <div class="d-grid gap-3">
+                    <a href="/dashboard/{{ filename }}" class="btn btn-light fw-bold py-3 px-4 rounded-pill shadow">
+                        <i class="fas fa-chart-line me-2"></i> العودة للتحليلات
+                    </a>
+                    <a href="/download/{{ filename }}" class="btn btn-outline-light py-3 px-4 rounded-pill">
+                        <i class="fas fa-download me-2"></i> تصدير البيانات
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

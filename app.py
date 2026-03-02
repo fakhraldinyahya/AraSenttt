@@ -9,6 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import re
+import ast
 
 from config import Config
 
@@ -16,31 +17,11 @@ app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
 
-# متغير عام لتتبع حالة النماذج
-models_loaded = False
+from utils.manager import model_manager
 
-# محاولة تحميل النماذج فقط عند الحاجة
+# Note: Models are now lazy-loaded by model_manager
 def load_models():
-    global models_loaded
-    if not models_loaded:
-        try:
-            from utils.preprocessing import ArabicTextPreprocessor
-            from utils.aspect_extractor import AspectExtractor
-            from utils.sentiment_classifier import SentimentClassifier
-            
-            global preprocessor, aspect_extractor, sentiment_classifier
-            
-            preprocessor = ArabicTextPreprocessor()
-            # aspect_extractor = AspectExtractor(model_path='models/aspect_extraction_model')
-            # sentiment_classifier = SentimentClassifier(model_path='models/sentiment_model')
-            aspect_extractor = AspectExtractor(model_path='models/aspect_extractor_final')
-            sentiment_classifier = SentimentClassifier(model_path='models/sentiment_model_final')
-            models_loaded = True
-            return True
-        except Exception as e:
-            print(f"خطأ في تحميل النماذج: {e}")
-            return False
-    return True
+    return model_manager.load_models()
 
 # التأكد من وجود المجلدات المطلوبة
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -137,67 +118,66 @@ def upload_file():
 
 @app.route('/analyze/<filename>', methods=['POST'])
 def analyze_file(filename):
-    # التحقق من وجود النماذج قبل التحليل
-    if not load_models():
-        return jsonify({'error': 'النماذج غير موجودة'}), 400
-        
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    processed_path = f'data/processed/analyzed_{filename}'
     
+    # Use Cache if exists
+    if os.path.exists(processed_path):
+        print(f"Loading cached results for: {filename}")
+        df_cached = pd.read_csv(processed_path)
+        results = []
+        for _, row in df_cached.iterrows():
+            try:
+                aspects = ast.literal_eval(row['aspects'])
+            except:
+                aspects = []
+            results.append({
+                'original_text': row['original_text'],
+                'cleaned_text': row['cleaned_text'],
+                'aspects': aspects,
+                'overall_sentiment': row['overall_sentiment'],
+                'confidence': float(row['confidence'])
+            })
+        return jsonify({'success': True, 'results': results, 'stats': _calculate_stats(results)})
+
+    # Load file
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if filename.endswith('.csv'):
         df = pd.read_csv(filepath)
     else:
         df = pd.read_excel(filepath)
     
-    text_column = None
-    for col in ['text', 'review', 'comment', 'نص', 'تقييم']:
-        if col in df.columns:
-            text_column = col
-            break
-    
+    text_column = next((col for col in ['text', 'review', 'comment', 'نص', 'تقييم'] if col in df.columns), None)
     if text_column is None:
         return jsonify({'error': 'لم يتم العثور على عمود النص في الملف'}), 400
     
-    results = []
-    for idx, row in df.iterrows():
-        text = str(row[text_column])
-        cleaned_text = preprocessor.clean_text(text)
-        aspects = aspect_extractor.predict_aspects(cleaned_text)
-        
-        aspect_sentiments = []
-        for aspect in aspects:
-            sentiment = sentiment_classifier.predict_sentiment(cleaned_text, aspect)
-            aspect_sentiments.append({
-                'aspect': aspect,
-                'sentiment': sentiment['sentiment'],
-                'confidence': sentiment['confidence']
-            })
-        
-        overall_sentiment = sentiment_classifier.predict_sentiment(cleaned_text)
-        
-        results.append({
-            'original_text': text,
-            'cleaned_text': cleaned_text,
-            'aspects': aspect_sentiments,
-            'overall_sentiment': overall_sentiment['sentiment'],
-            'confidence': overall_sentiment['confidence']
-        })
+    # Process Batch
+    texts = df[text_column].fillna("").astype(str).tolist()
+    results = model_manager.analyze_batch(texts)
     
+    # Save Results
     results_df = pd.DataFrame(results)
-    processed_path = f'data/processed/analyzed_{filename}'
     results_df.to_csv(processed_path, index=False)
     
     return jsonify({
         'success': True,
         'results': results,
-        'stats': {
-            'total_reviews': len(results),
-            'sentiment_distribution': {
-                'إيجابي': sum(1 for r in results if r['overall_sentiment'] == 'إيجابي'),
-                'سلبي': sum(1 for r in results if r['overall_sentiment'] == 'سلبي'),
-                'محايد': sum(1 for r in results if r['overall_sentiment'] == 'محايد')
-            }
-        }
+        'stats': _calculate_stats(results)
     })
+
+def _calculate_stats(results):
+    return {
+        'total_reviews': len(results),
+        'sentiment_distribution': {
+            'إيجابي': sum(1 for r in results if r['overall_sentiment'] == 'إيجابي'),
+            'سلبي': sum(1 for r in results if r['overall_sentiment'] == 'سلبي'),
+            'محايد': sum(1 for r in results if r['overall_sentiment'] == 'محايد')
+        }
+    }
+
+@app.route('/results/<filename>')
+def get_results(filename):
+    """جلب النتائج المحللة مسبقاً للداش بورد"""
+    return analyze_file(filename)
 
 @app.route('/dashboard/<filename>')
 def dashboard(filename):

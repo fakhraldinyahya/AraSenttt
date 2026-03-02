@@ -1,424 +1,55 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AraSent - عن المنصة وفريق العمل</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        .team-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .team-card:hover {
-            transform: translateY(-10px);
-        }
-        .team-img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-        }
-        .team-social a {
-            display: inline-block;
-            width: 35px;
-            height: 35px;
-            line-height: 35px;
-            text-align: center;
-            background: #f8f9fa;
-            border-radius: 50%;
-            color: #333;
-            margin: 0 5px;
-            transition: all 0.3s;
-        }
-        .team-social a:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-        .value-icon {
-            width: 70px;
-            height: 70px;
-            line-height: 70px;
-            text-align: center;
-            background: rgba(0,123,255,0.1);
-            border-radius: 50%;
-            color: var(--primary-color);
-            font-size: 30px;
-            margin: 0 auto 20px;
-        }
-        .timeline-item {
-            position: relative;
-            padding-right: 30px;
-            margin-bottom: 30px;
-        }
-        .timeline-item:before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 5px;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--primary-color);
-        }
-        .timeline-item:after {
-            content: '';
-            position: absolute;
-            right: 7px;
-            top: 25px;
-            width: 2px;
-            height: calc(100% + 5px);
-            background: #e9ecef;
-        }
-        .timeline-item:last-child:after {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <!-- شريط التنقل (مشابه للصفحة الرئيسية) -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="/"><i class="fas fa-chart-line"></i> AraSent</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">الرئيسية</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/about">عن المنصة</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/team">فريق العمل</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contact">اتصل بنا</a>
-                    </li>
-                </ul>
-                <div class="navbar-nav">
-                    <a href="/upload" class="btn btn-light">
-                        <i class="fas fa-upload"></i> ابدأ التحليل
-                    </a>
-                </div>
+{% extends "base.html" %}
+
+{% block title %}AraSent - عن المنصة ورؤيتنا لمستقبل البيانات{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-primary text-white text-center">
+    <div class="container py-5 fade-in">
+        <h1 class="display-3 fw-800 mb-3">عن AraSent</h1>
+        <p class="lead opacity-90 fs-4">نحن نؤمن بأن كل نص عربي يحمل قيمة، ومهمتنا هي استخلاص هذه القيمة بدقة.</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row g-5 align-items-center mb-5">
+        <div class="col-lg-6 fade-in">
+            <h2 class="display-5 fw-bold text-primary mb-4">رؤيتنا</h2>
+            <p class="text-muted fs-5 mb-4">نهدف إلى سد الفجوة في معالجة اللغة الطبيعية (NLP) للمحتوى العربي. من خلال
+                دمج أحدث التقنيات مع فهمنا العميق للسياق الثقافي واللغوي، نقدم أدوات تحليل هي الأكثر دقة في المنطقة.</p>
+            <div class="card p-4 bg-light border-0">
+                <h5 class="fw-bold mb-3"><i class="fas fa-bullseye text-primary me-2"></i> هدفنا الأساسي</h5>
+                <p class="mb-0 text-secondary">تمكين الشركات العربية من فهم صوت العميل الحقيقي لاتخاذ قرارات قائمة على
+                    بيانات موثوقة وليس مجرد تخمينات.</p>
             </div>
         </div>
-    </nav>
-
-    <!-- رأس صفحة حولنا -->
-    <section class="page-header bg-primary text-white py-5">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold">عن منصة AraSent</h1>
-            <p class="lead">نحو فهم أفضل للمشاعر العربية باستخدام الذكاء الاصطناعي</p>
-        </div>
-    </section>
-
-    <!-- قصة المنصة -->
-    <section class="story-section py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-4">
-                    <h2 class="fw-bold mb-4">قصتنا</h2>
-                    <p class="lead text-muted mb-4">انطلقت منصة AraSent في عام 2026 بهدف سد الفجوة في تحليل المشاعر للنصوص العربية.</p>
-                    <p>لطالما كانت اللغة العربية تمثل تحدياً لأنظمة تحليل المشاعر التقليدية بسبب تعقيدها وثرائها اللغوي. لهذا قررنا بناء منصة متخصصة تفهم خصوصية اللغة العربية بكل لهجاتها.</p>
-                    <p>اليوم، نحن نفخر بكوننا المنصة الرائدة في تحليل المشاعر العربية، حيث نخدم أكثر من 1000 عميل حول العالم ونساعدهم في فهم آراء عملائهم بشكل أفضل.</p>
-                    
-                    <div class="row mt-4">
-                        <div class="col-6">
-                            <h3 class="fw-bold text-primary">+50K</h3>
-                            <p class="text-muted">نص تم تحليله</p>
-                        </div>
-                        <div class="col-6">
-                            <h3 class="fw-bold text-primary">+1000</h3>
-                            <p class="text-muted">عميل نشط</p>
-                        </div>
-                        <div class="col-6">
-                            <h3 class="fw-bold text-primary">95%</h3>
-                            <p class="text-muted">دقة التحليل</p>
-                        </div>
-                        <div class="col-6">
-                            <h3 class="fw-bold text-primary">+10</h3>
-                            <p class="text-muted">خبير في الفريق</p>
-                        </div>
+        <div class="col-lg-6 fade-in" style="animation-delay: 0.1s;">
+            <div class="row g-4">
+                <div class="col-6">
+                    <div class="card h-100 p-4 text-center shadow-sm">
+                        <i class="fas fa-microchip fa-3x text-primary mb-3"></i>
+                        <h6 class="fw-bold">ذكاء فائق</h6>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <img src="https://via.placeholder.com/600x400/007bff/ffffff?text=رحلة+AraSent" 
-                         alt="رحلة AraSent" 
-                         class="img-fluid rounded-4 shadow">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- رؤيتنا ورسالتنا -->
-    <section class="vision-mission py-5 bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="vision-card bg-white p-5 rounded-4 h-100">
-                        <div class="value-icon">
-                            <i class="fas fa-eye"></i>
-                        </div>
-                        <h3 class="fw-bold mb-3">رؤيتنا</h3>
-                        <p class="text-muted">أن نكون المنصة الأولى عالمياً في تحليل المشاعر للنصوص العربية، وأن نساهم في تطوير مجال معالجة اللغة العربية باستخدام الذكاء الاصطناعي.</p>
+                <div class="col-6">
+                    <div class="card h-100 p-4 text-center shadow-sm">
+                        <i class="fas fa-shield-halved fa-3x text-primary mb-3"></i>
+                        <h6 class="fw-bold">خصوصية تامة</h6>
                     </div>
                 </div>
-                <div class="col-md-6 mb-4">
-                    <div class="mission-card bg-white p-5 rounded-4 h-100">
-                        <div class="value-icon">
-                            <i class="fas fa-bullseye"></i>
-                        </div>
-                        <h3 class="fw-bold mb-3">رسالتنا</h3>
-                        <p class="text-muted">تمكين المؤسسات والأفراد من فهم مشاعر جمهورهم بدقة من خلال توفير أدوات تحليل ذكية وسهلة الاستخدام للنصوص العربية.</p>
+                <div class="col-6">
+                    <div class="card h-100 p-4 text-center shadow-sm">
+                        <i class="fas fa-globe-americas fa-3x text-primary mb-3"></i>
+                        <h6 class="fw-bold">دعم اللهجات</h6>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card h-100 p-4 text-center shadow-sm">
+                        <i class="fas fa-code fa-3x text-primary mb-3"></i>
+                        <h6 class="fw-bold">تكامل سهل</h6>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- قيمنا -->
-    <section class="values-section py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold">قيمنا</h2>
-                <p class="lead text-muted">المبادئ التي توجه عملنا</p>
-            </div>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="value-card text-center p-4">
-                        <div class="value-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <h4 class="fw-bold">الجودة</h4>
-                        <p class="text-muted">نسعى دائماً لتقديم أفضل النتائج بدقة عالية</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="value-card text-center p-4">
-                        <div class="value-icon">
-                            <i class="fas fa-handshake"></i>
-                        </div>
-                        <h4 class="fw-bold">الثقة</h4>
-                        <p class="text-muted">نحن نضمن خصوصية وأمان بيانات عملائنا</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="value-card text-center p-4">
-                        <div class="value-icon">
-                            <i class="fas fa-lightbulb"></i>
-                        </div>
-                        <h4 class="fw-bold">الابتكار</h4>
-                        <p class="text-muted">نستخدم أحدث التقنيات لنقدم حلولاً مبتكرة</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- فريق العمل -->
-    <section class="team-section py-5 bg-light">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold">فريق العمل</h2>
-                <p class="lead text-muted">نخبة من المتخصصين في الذكاء الاصطناعي ومعالجة اللغات</p>
-            </div>
-            <div class="row">
-                <!-- عضو الفريق 1 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://via.placeholder.com/400x250/007bff/ffffff?text=د.+أحمد+محمد" alt="د. أحمد محمد" class="team-img">
-                        <div class="p-4">
-                            <h4 class="fw-bold mb-1">د. أحمد محمد</h4>
-                            <p class="text-primary mb-2">المؤسس والرئيس التنفيذي</p>
-                            <p class="text-muted small mb-3">دكتوراه في الذكاء الاصطناعي من جامعة ستانفورد، خبرة 15 سنة في معالجة اللغات الطبيعية</p>
-                            <div class="team-social">
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-twitter"></i></a>
-                                <a href="#"><i class="fab fa-github"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- عضو الفريق 2 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://via.placeholder.com/400x250/28a745/ffffff?text=د.+سارة+عبدالله" alt="د. سارة عبدالله" class="team-img">
-                        <div class="p-4">
-                            <h4 class="fw-bold mb-1">د. سارة عبدالله</h4>
-                            <p class="text-primary mb-2">مديرة قسم الأبحاث</p>
-                            <p class="text-muted small mb-3">دكتوراه في اللغويات الحاسوبية، متخصصة في تحليل المشاعر العربية</p>
-                            <div class="team-social">
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-twitter"></i></a>
-                                <a href="#"><i class="fab fa-google"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- عضو الفريق 3 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://via.placeholder.com/400x250/dc3545/ffffff?text=م.+محمد+العلي" alt="م. محمد العلي" class="team-img">
-                        <div class="p-4">
-                            <h4 class="fw-bold mb-1">م. محمد العلي</h4>
-                            <p class="text-primary mb-2">كبير مهندسي البرمجيات</p>
-                            <p class="text-muted small mb-3">مهندس برمجيات بخبرة 10 سنوات في تطوير تطبيقات الذكاء الاصطناعي</p>
-                            <div class="team-social">
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-github"></i></a>
-                                <a href="#"><i class="fab fa-stack-overflow"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- عضو الفريق 4 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://via.placeholder.com/400x250/ffc107/333333?text=نورا+الحربي" alt="نورا الحربي" class="team-img">
-                        <div class="p-4">
-                            <h4 class="fw-bold mb-1">نورا الحربي</h4>
-                            <p class="text-primary mb-2">مديرة المنتج</p>
-                            <p class="text-muted small mb-3">خبرة في إدارة منتجات التقنية وريادة الأعمال الرقمية</p>
-                            <div class="team-social">
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-twitter"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- عضو الفريق 5 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://via.placeholder.com/400x250/6f42c1/ffffff?text=د.+عمر+الزهراني" alt="د. عمر الزهراني" class="team-img">
-                        <div class="p-4">
-                            <h4 class="fw-bold mb-1">د. عمر الزهراني</h4>
-                            <p class="text-primary mb-2">عالم بيانات</p>
-                            <p class="text-muted small mb-3">متخصص في تعلم الآلة وتحليل البيانات الضخمة</p>
-                            <div class="team-social">
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-kaggle"></i></a>
-                                <a href="#"><i class="fab fa-github"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- عضو الفريق 6 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://via.placeholder.com/400x250/20c997/ffffff?text=لمى+القحطاني" alt="لمى القحطاني" class="team-img">
-                        <div class="p-4">
-                            <h4 class="fw-bold mb-1">لمى القحطاني</h4>
-                            <p class="text-primary mb-2">مصممة تجربة المستخدم</p>
-                            <p class="text-muted small mb-3">خبيرة في تصميم واجهات المستخدم وتجربة المستخدم</p>
-                            <div class="team-social">
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-behance"></i></a>
-                                <a href="#"><i class="fab fa-dribbble"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-
-    <!-- إحصائيات سريعة -->
-    <section class="stats-mini py-4 bg-primary text-white">
-        <div class="container">
-            <div class="row justify-content-center text-center">
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="fw-bold mb-0">50K+</h3>
-                    <small>نص</small>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="fw-bold mb-0">1000+</h3>
-                    <small>عميل</small>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="fw-bold mb-0">95%</h3>
-                    <small>دقة</small>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="fw-bold mb-0">10+</h3>
-                    <small>خبير</small>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- قسم الدعوة للانضمام للفريق -->
-    <section class="join-section py-5">
-        <div class="container text-center">
-            <h2 class="fw-bold mb-4">انضم إلى فريقنا</h2>
-            <p class="lead text-muted mb-4">نحن دائماً نبحث عن المواهب الشابة والمبدعة</p>
-            <a href="/careers" class="btn btn-primary btn-lg">
-                <i class="fas fa-paper-plane"></i> قدم الآن
-            </a>
-        </div>
-    </section>
-
-    <!-- تذييل الصفحة -->
-    <footer class="bg-dark text-white py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h5><i class="fas fa-chart-line"></i> AraSent</h5>
-                    <p class="text-muted">منصة رائدة في تحليل المشاعر للنصوص العربية باستخدام أحدث تقنيات الذكاء الاصطناعي.</p>
-                    <div class="social-links">
-                        <a href="#" class="text-white me-2"><i class="fab fa-facebook fa-lg"></i></a>
-                        <a href="#" class="text-white me-2"><i class="fab fa-twitter fa-lg"></i></a>
-                        <a href="#" class="text-white me-2"><i class="fab fa-linkedin fa-lg"></i></a>
-                        <a href="#" class="text-white"><i class="fab fa-github fa-lg"></i></a>
-                    </div>
-                </div>
-                <div class="col-md-2 mb-4">
-                    <h6>روابط سريعة</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="/" class="text-muted text-decoration-none">الرئيسية</a></li>
-                        <li><a href="/about" class="text-muted text-decoration-none">عن المنصة</a></li>
-                        <li><a href="/team" class="text-muted text-decoration-none">فريق العمل</a></li>
-                        <li><a href="/blog" class="text-muted text-decoration-none">المدونة</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6>الدعم</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="/faq" class="text-muted text-decoration-none">الأسئلة الشائعة</a></li>
-                        <li><a href="/contact" class="text-muted text-decoration-none">اتصل بنا</a></li>
-                        <li><a href="/privacy" class="text-muted text-decoration-none">سياسة الخصوصية</a></li>
-                        <li><a href="/terms" class="text-muted text-decoration-none">شروط الاستخدام</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6>النشرة البريدية</h6>
-                    <p class="text-muted">اشترك لتصلك آخر الأخبار والتحديثات</p>
-                    <div class="input-group">
-                        <input type="email" class="form-control" placeholder="بريدك الإلكتروني">
-                        <button class="btn btn-primary" type="button">اشترك</button>
-                    </div>
-                </div>
-            </div>
-            <hr class="bg-secondary">
-            <div class="text-center text-muted">
-                <small>© 2026 AraSent - جميع الحقوق محفوظة</small>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

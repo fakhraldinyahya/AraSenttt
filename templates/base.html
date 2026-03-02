@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AraSent - تحليل المشاعر للغة العربية{% endblock %}</title>
+
+    <!-- Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Unified Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-chart-line me-2"></i> AraSent
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">الرئيسية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/upload' %}active{% endif %}" href="/upload">رفع
+                            الملفات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="/about">عن
+                            المنصة</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/team' %}active{% endif %}" href="/team">فريق
+                            العمل</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/contact' %}active{% endif %}" href="/contact">اتصل
+                            بنا</a>
+                    </li>
+                </ul>
+                <div class="navbar-nav ms-lg-3">
+                    <a href="/upload" class="btn btn-light fw-bold px-4 rounded-pill">
+                        <i class="fas fa-rocket me-2"></i> حلل الآن
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Unified Footer -->
+    <footer class="bg-dark text-white pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4">
+                    <h4 class="fw-bold mb-4 text-primary"><i class="fas fa-chart-line me-2"></i> AraSent</h4>
+                    <p class="text-secondary">الخيار الأول للشركات في الوطن العربي لتحويل التقييمات والنصوص إلى بيانات
+                        استراتيجية مدعومة بأقوى تقنيات الذكاء الاصطناعي.</p>
+                    <div class="social-links d-flex gap-3">
+                        <a href="#" class="text-white opacity-50 hover-opacity-100 fs-5"><i
+                                class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white opacity-50 hover-opacity-100 fs-5"><i
+                                class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-white opacity-50 hover-opacity-100 fs-5"><i
+                                class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 ms-lg-auto">
+                    <h6 class="fw-bold mb-4">روابط سريعة</h6>
+                    <ul class="list-unstyled text-secondary">
+                        <li class="mb-2"><a href="/" class="text-decoration-none text-inherit">الرئيسية</a></li>
+                        <li class="mb-2"><a href="/upload" class="text-decoration-none text-inherit">ابدأ التحليل</a>
+                        </li>
+                        <li class="mb-2"><a href="/about" class="text-decoration-none text-inherit">عن القمة</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="fw-bold mb-4">تواصل معنا</h6>
+                    <ul class="list-unstyled text-secondary">
+                        <li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> info@arasent.ai</li>
+                        <li class="mb-2"><i class="fas fa-phone me-2 text-primary"></i> +966 5XX XXX XXX</li>
+                        <li class="mb-2"><i class="fas fa-location-dot me-2 text-primary"></i> الرياض، المملكة العربية
+                            السعودية</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary opacity-25">
+            <div class="text-center text-secondary small">
+                © 2026 AraSent - جميع الحقوق محفوظة
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .text-inherit {
+            color: inherit;
+            transition: color 0.3s;
+        }
+
+        .text-inherit:hover {
+            color: var(--primary-color);
+        }
+
+        .hover-opacity-100:hover {
+            opacity: 1 !important;
+        }
+    </style>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>
