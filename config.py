@@ -2,7 +2,7 @@ import os
 
 class Config:
     SECRET_KEY = 'arasent_secret_key_2024'
-    UPLOAD_FOLDER = 'static/uploads'
+    UPLOAD_FOLDER = 'uploads'
     ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     

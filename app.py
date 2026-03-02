@@ -8,6 +8,7 @@ import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+import re
 
 from config import Config
 
@@ -30,8 +31,10 @@ def load_models():
             global preprocessor, aspect_extractor, sentiment_classifier
             
             preprocessor = ArabicTextPreprocessor()
-            aspect_extractor = AspectExtractor(model_path='models/aspect_extraction_model')
-            sentiment_classifier = SentimentClassifier(model_path='models/sentiment_model')
+            # aspect_extractor = AspectExtractor(model_path='models/aspect_extraction_model')
+            # sentiment_classifier = SentimentClassifier(model_path='models/sentiment_model')
+            aspect_extractor = AspectExtractor(model_path='models/aspect_extractor_final')
+            sentiment_classifier = SentimentClassifier(model_path='models/sentiment_model_final')
             models_loaded = True
             return True
         except Exception as e:
@@ -48,6 +51,28 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def secure_filename_arabic(filename):
+    """
+    نسخة من secure_filename تدعم الحروف العربية
+    تقوم بتنظيف اسم الملف من الرموز الخطرة مع الحفاظ على الحروف والارقام (بما فيها العربية)
+    """
+    # فصل الامتداد
+    name, ext = os.path.splitext(filename)
+    
+    # تنظيف الاسم: السماح بالحروف والأرقام (تشمل العربية في بايثون 3) والنقاط والشرطات والمسافات
+    clean_name = re.sub(r'[^\w\.\-\s]', '', name)
+    
+    # استبدال المسافات بشرطة سفلية
+    clean_name = re.sub(r'\s+', '_', clean_name)
+    
+    # إزالة النقاط والشرطات من البداية والنهاية
+    clean_name = clean_name.strip('._-')
+    
+    if not clean_name:
+        clean_name = f"upload_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+    return f"{clean_name}{ext.lower()}"
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -55,6 +80,7 @@ def index():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
+        print("Received file upload request")
         # التحقق من وجود النماذج فقط عند محاولة الرفع
         if not load_models():
             return jsonify({
@@ -71,14 +97,29 @@ def upload_file():
             return jsonify({'error': 'الملف فارغ'}), 400
         
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
+            original_filename = file.filename
+            file_ext = os.path.splitext(original_filename)[1].lower()
             
-            if filename.endswith('.csv'):
+            # تأمين اسم الملف مع الحفاظ على الحروف العربية
+            filename = secure_filename_arabic(original_filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            file.save(filepath)
+            print(f"File saved to {filepath}")
+            print(f"Uploaded file: {filepath}")
+            print(f"Extension detected: {file_ext}")
+
+            if file_ext == ".csv":
                 df = pd.read_csv(filepath)
+
+            elif file_ext == ".xlsx":
+                df = pd.read_excel(filepath, engine="openpyxl")
+
+            elif file_ext == ".xls":
+                df = pd.read_excel(filepath, engine="xlrd")
+
             else:
-                df = pd.read_excel(filepath)
+                return jsonify({"error": f"Unsupported file format: {file_ext}"}), 400
             
             raw_path = f'data/raw/{datetime.now().strftime("%Y%m%d_%H%M%S")}_{filename}'
             df.to_csv(raw_path, index=False)
