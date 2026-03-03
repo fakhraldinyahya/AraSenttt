@@ -1,347 +1,169 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AraSent - تحليل المشاعر للغة العربية</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <!-- شريط التنقل المحسن -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-chart-line"></i> AraSent
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/">الرئيسية</a>
+{% extends "base.html" %}
+
+{% block title %}AraSent - المستقبل الذكي لتحليل المشاعر والبيانات الضخمة{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center text-lg-start">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 fade-in">
+                <span class="badge rounded-pill bg-white bg-opacity-20 px-3 py-2 mb-4">
+                    <i class="fas fa-sparkles text-warning me-2"></i> مدعوم بتقنيات AraBERT المتطورة
+                </span>
+                <h1 class="display-3 fw-800 mb-4">حلل مشاعر عملائك بلمسة <span class="text-warning">ذكاء اصطناعي</span>
+                </h1>
+                <p class="lead mb-5 opacity-90 fs-4">المنصة العربية الأولى لتحويل التقييمات والنصوص العشوائية إلى رؤى
+                    استراتيجية ونتائج دقيقة تخدم نمو أعمالك.</p>
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start">
+                    <a href="/upload" class="btn btn-warning btn-lg px-5 py-3 fw-bold shadow-lg">
+                        <i class="fas fa-rocket me-2"></i> ابدأ التحليل الآن
+                    </a>
+                    <a href="#how-it-works" class="btn btn-outline-light btn-lg px-5 py-3">
+                        <i class="fas fa-play-circle me-2"></i> كيف يعمل؟
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 fade-in" style="animation-delay: 0.2s;">
+                <div class="card p-2 bg-white bg-opacity-10 border-0 shadow-lg position-relative overflow-hidden">
+                    <img src="https://via.placeholder.com/650x450/ffffff/007bff?text=AraSent+AI+Analysis+Preview"
+                        alt="Dashboard Preview" class="img-fluid rounded-3">
+                    <div
+                        class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-center text-white small">
+                        مثال لتحليل المشاعر والجوانب (ABSA)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-3">
+                <h2 class="fw-800 text-primary mb-0">+50,000</h2>
+                <p class="text-muted">نص تم تحليله</p>
+            </div>
+            <div class="col-md-3">
+                <h2 class="fw-800 text-primary mb-0">95%</h2>
+                <p class="text-muted">دقة خوارزميات BERT</p>
+            </div>
+            <div class="col-md-3">
+                <h2 class="fw-800 text-primary mb-0">1.2 ثانية</h2>
+                <p class="text-muted">متوسط سرعة المعالجة</p>
+            </div>
+            <div class="col-md-3">
+                <h2 class="fw-800 text-primary mb-0">+500</h2>
+                <p class="text-muted">عميل مؤسسي</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it Works -->
+<section id="how-it-works" class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5 fade-in">
+            <h2 class="display-5 fw-bold text-primary">ثلاث خطوات بسيطة لنتائج مذهلة</h2>
+            <p class="text-muted fs-5">قمنا بتبسيط الذكاء الاصطناعي ليعمل من أجلك</p>
+        </div>
+        <div class="row g-5">
+            <div class="col-md-4 text-center fade-in" style="animation-delay: 0.1s;">
+                <div class="mb-4 d-inline-block bg-primary bg-opacity-10 p-4 rounded-circle">
+                    <i class="fas fa-file-excel fa-3x text-primary"></i>
+                </div>
+                <h4 class="fw-bold mb-3">1. ارفع ملفك</h4>
+                <p class="text-muted">ارفع ملف Excel أو CSV يحتوي على تقييمات عملائك بكل سهولة.</p>
+            </div>
+            <div class="col-md-4 text-center fade-in" style="animation-delay: 0.2s;">
+                <div class="mb-4 d-inline-block bg-success bg-opacity-10 p-4 rounded-circle">
+                    <i class="fas fa-brain fa-3x text-success"></i>
+                </div>
+                <h4 class="fw-bold mb-3">2. ذكاء المعالجة</h4>
+                <p class="text-muted">تقوم خوارزمياتنا المتقدمة بتنظيف النصوص وتحليل المشاعر دفعة واحدة.</p>
+            </div>
+            <div class="col-md-4 text-center fade-in" style="animation-delay: 0.3s;">
+                <div class="mb-4 d-inline-block bg-warning bg-opacity-10 p-4 rounded-circle">
+                    <i class="fas fa-chart-pie fa-3x text-warning"></i>
+                </div>
+                <h4 class="fw-bold mb-3">3. شاهد النتائج</h4>
+                <p class="text-muted">احصل على لوحة تحكم تفاعلية وملخص تنفيذي لاتخاذ القرارات.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Advanced Features -->
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 order-lg-2">
+                <h2 class="display-6 fw-bold text-primary mb-4">تقنية ABSA: لا نكتفي بالمجمل</h2>
+                <p class="text-muted mb-4 fs-5">خلافاً للأنظمة التقليدية، يقوم AraSent بتحليل كل جانب من جوانب الخدمة
+                    على حدة. هل العميل غاضب من "السعر" أم من جودة "الطعام"؟ نحن نجيبك بدقة.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-primary me-3 fa-lg"></i>
+                        <span class="fw-bold">دعم اللهجات العربية المختلفة</span>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/about">عن المنصة</a>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-primary me-3 fa-lg"></i>
+                        <span class="fw-bold">استخراج التوصيات الآلية للنمو</span>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/team">فريق العمل</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contact">اتصل بنا</a>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check-circle text-primary me-3 fa-lg"></i>
+                        <span class="fw-bold">معالجة دفعية (Batch) فائقة السرعة</span>
                     </li>
                 </ul>
-                <div class="navbar-nav">
-                    <a href="/upload" class="btn btn-light">
-                        <i class="fas fa-upload"></i> ابدأ التحليل
-                    </a>
+            </div>
+            <div class="col-lg-6 order-lg-1">
+                <div class="card border-0 shadow-lg p-3">
+                    <div id="demoChart" style="height: 350px;"></div>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+</section>
 
-    <!-- القسم الرئيسي المحسن -->
-    <section class="hero-section py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 text-center text-lg-start">
-                    <h1 class="display-3 fw-bold mb-4 fade-in">
-                        <i class="fas fa-heart text-danger"></i> 
-                        AraSent: تحليل المشاعر للغة العربية
-                    </h1>
-                    <p class="lead mb-4 fade-in">
-                        منصة ذكية تعتمد على تقنيات الذكاء الاصطناعي لتحليل آراء العملاء 
-                        واستخراج المشاعر من النصوص العربية بدقة عالية
-                    </p>
-                    <div class="d-flex gap-3 justify-content-center justify-content-lg-start fade-in">
-                        <a href="/upload" class="btn btn-primary btn-lg">
-                            <i class="fas fa-rocket"></i> ابدأ الآن مجاناً
-                        </a>
-                        <a href="/about" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-info-circle"></i> اعرف المزيد
-                        </a>
-                    </div>
-                    
-                    <!-- إحصائيات سريعة -->
-                    <div class="row mt-5 g-3">
-                        <div class="col-4">
-                            <div class="stat-badge">
-                                <i class="fas fa-chart-bar"></i>
-                                <span class="h4 mb-0">+10K</span>
-                                <small>تحليل</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="stat-badge">
-                                <i class="fas fa-smile"></i>
-                                <span class="h4 mb-0">95%</span>
-                                <small>دقة</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="stat-badge">
-                                <i class="fas fa-clock"></i>
-                                <span class="h4 mb-0">فوري</span>
-                                <small>نتائج</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 text-center fade-in">
-                    <img src="https://via.placeholder.com/500x400/ffffff/333333?text=تحليل+المشاعر" 
-                         alt="تحليل المشاعر" 
-                         class="img-fluid rounded-4 shadow-lg"
-                         style="max-width: 100%; height: auto;">
-                </div>
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="card bg-primary text-white p-5 text-center border-0 shadow-lg">
+            <h2 class="display-5 fw-bold mb-4">جاهز لتحويل بياناتك إلى أرباح؟</h2>
+            <p class="lead mb-5 opacity-90">انضم إلى مئات الشركات التي تثق في AraSent يومياً.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/upload" class="btn btn-warning btn-lg px-5 py-3 fw-bold shadow">
+                    ابدأ تجربتك المجانية
+                </a>
+                <a href="/contact" class="btn btn-outline-light btn-lg px-5 py-3">
+                    تحدث مع خبير
+                </a>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- قسم المميزات -->
-    <section class="features-section py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold">لماذا تختار <span class="text-primary">AraSent</span>؟</h2>
-                <p class="lead text-muted">منصتنا تقدم حلولاً متكاملة لتحليل المشاعر باللغة العربية</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-card text-center p-4">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-language fa-3x text-primary"></i>
-                        </div>
-                        <h3>دعم كامل للعربية</h3>
-                        <p class="text-muted">تم تصميم النماذج خصيصاً للغة العربية بجميع لهجاتها</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card text-center p-4">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-brain fa-3x text-primary"></i>
-                        </div>
-                        <h3>ذكاء اصطناعي متقدم</h3>
-                        <p class="text-muted">نستخدم أحدث تقنيات التعلم العميق لتحليل دقيق</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card text-center p-4">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-chart-pie fa-3x text-primary"></i>
-                        </div>
-                        <h3>تقارير تفاعلية</h3>
-                        <p class="text-muted">رسوم بيانية وإحصائيات سهلة الفهم والتصدير</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+{% endblock %}
 
-    <!-- قسم الإحصائيات المحسن -->
-    <section class="stats-section py-5 bg-light">
-        <div class="container">
-            <div class="row text-center g-4">
-                <div class="col-md-3 col-6">
-                    <div class="stat-card p-4">
-                        <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
-                        <h3 class="display-6 fw-bold">50K+</h3>
-                        <p class="text-muted">نص تم تحليله</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-card p-4">
-                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                        <h3 class="display-6 fw-bold">1000+</h3>
-                        <p class="text-muted">عميل نشط</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-card p-4">
-                        <i class="fas fa-smile fa-3x text-primary mb-3"></i>
-                        <h3 class="display-6 fw-bold">95%</h3>
-                        <p class="text-muted">دقة التحليل</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-card p-4">
-                        <i class="fas fa-bolt fa-3x text-primary mb-3"></i>
-                        <h3 class="display-6 fw-bold">&lt; 2ث</h3>
-                        <p class="text-muted">سرعة التحليل</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- قسم نموذج العمل -->
-    <section class="how-it-works py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold">كيف تعمل المنصة؟</h2>
-                <p class="lead text-muted">ثلاث خطوات بسيطة للحصول على تحليل دقيق</p>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="step-card text-center">
-                        <div class="step-number">1</div>
-                        <i class="fas fa-upload fa-3x text-primary mb-3"></i>
-                        <h4>رفع النصوص</h4>
-                        <p class="text-muted">قم برفع ملف أو لصق النص المراد تحليله</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card text-center">
-                        <div class="step-number">2</div>
-                        <i class="fas fa-cogs fa-3x text-primary mb-3"></i>
-                        <h4>المعالجة والتحليل</h4>
-                        <p class="text-muted">تقوم أنظمتنا بتحليل النصوص باستخدام الذكاء الاصطناعي</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card text-center">
-                        <div class="step-number">3</div>
-                        <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
-                        <h4>عرض النتائج</h4>
-                        <p class="text-muted">احصل على تقارير شاملة ومفصلة</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- قسم آراء العملاء -->
-    <section class="testimonials-section py-5 bg-light">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold">ماذا يقول عملاؤنا؟</h2>
-                <p class="lead text-muted">تجارب حقيقية من مستخدمي المنصة</p>
-            </div>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="testimonial-card p-4">
-                        <div class="stars mb-3">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                        </div>
-                        <p class="mb-4">"منصة رائعة! ساعدتنا في فهم آراء عملائنا بشكل أفضل وتحسين خدماتنا"</p>
-                        <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/50" alt="عميل" class="rounded-circle me-3">
-                            <div>
-                                <h5 class="mb-1">أحمد محمد</h5>
-                                <small class="text-muted">مدير تسويق</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="testimonial-card p-4">
-                        <div class="stars mb-3">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                        </div>
-                        <p class="mb-4">"الدقة في تحليل المشاعر العربية ممتازة، خصوصاً مع اللهجات المحلية المختلفة"</p>
-                        <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/50" alt="عميلة" class="rounded-circle me-3">
-                            <div>
-                                <h5 class="mb-1">سارة عبدالله</h5>
-                                <small class="text-muted">باحثة في الذكاء الاصطناعي</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="testimonial-card p-4">
-                        <div class="stars mb-3">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star-half-alt text-warning"></i>
-                        </div>
-                        <p class="mb-4">"واجهة سهلة الاستخدام وتقارير تفاعلية مفيدة جداً لاتخاذ القرارات"</p>
-                        <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/50" alt="عميل" class="rounded-circle me-3">
-                            <div>
-                                <h5 class="mb-1">خالد العمري</h5>
-                                <small class="text-muted">رئيس قسم analytics</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- قسم الدعوة للاستخدام -->
-    <section class="cta-section py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <h2 class="display-5 fw-bold text-white mb-4">ابدأ تحليل مشاعر عملائك اليوم!</h2>
-                    <p class="lead text-white mb-4">جرب منصتنا مجاناً ولمدة 14 يوماً دون الحاجة لبطاقة ائتمان</p>
-                    <a href="/upload" class="btn btn-light btn-lg">
-                        <i class="fas fa-play"></i> ابدأ التجربة المجانية
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- تذييل الصفحة المحسن -->
-    <footer class="bg-dark text-white py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h5><i class="fas fa-chart-line"></i> AraSent</h5>
-                    <p class="text-muted">منصة رائدة في تحليل المشاعر للنصوص العربية باستخدام أحدث تقنيات الذكاء الاصطناعي.</p>
-                    <div class="social-links">
-                        <a href="#" class="text-white me-2"><i class="fab fa-facebook fa-lg"></i></a>
-                        <a href="#" class="text-white me-2"><i class="fab fa-twitter fa-lg"></i></a>
-                        <a href="#" class="text-white me-2"><i class="fab fa-linkedin fa-lg"></i></a>
-                        <a href="#" class="text-white"><i class="fab fa-github fa-lg"></i></a>
-                    </div>
-                </div>
-                <div class="col-md-2 mb-4">
-                    <h6>روابط سريعة</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="/" class="text-muted text-decoration-none">الرئيسية</a></li>
-                        <li><a href="/about" class="text-muted text-decoration-none">عن المنصة</a></li>
-                        <li><a href="/team" class="text-muted text-decoration-none">فريق العمل</a></li>
-                        <li><a href="/blog" class="text-muted text-decoration-none">المدونة</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6>الدعم</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="/faq" class="text-muted text-decoration-none">الأسئلة الشائعة</a></li>
-                        <li><a href="/contact" class="text-muted text-decoration-none">اتصل بنا</a></li>
-                        <li><a href="/privacy" class="text-muted text-decoration-none">سياسة الخصوصية</a></li>
-                        <li><a href="/terms" class="text-muted text-decoration-none">شروط الاستخدام</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6>النشرة البريدية</h6>
-                    <p class="text-muted">اشترك لتصلك آخر الأخبار والتحديثات</p>
-                    <div class="input-group">
-                        <input type="email" class="form-control" placeholder="بريدك الإلكتروني">
-                        <button class="btn btn-primary" type="button">اشترك</button>
-                    </div>
-                </div>
-            </div>
-            <hr class="bg-secondary">
-            <div class="text-center text-muted">
-                <small>© 2026 AraSent - جميع الحقوق محفوظة</small>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% block extra_js %}
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script>
+    // Demo Chart for Homepage
+    const trace1 = {
+        x: ['الطعام', 'الخدمة', 'السعر', 'النظافة'],
+        y: [85, 40, 70, 95],
+        name: 'إيجابي',
+        type: 'bar',
+        marker: { color: '#28a745' }
+    };
+    const layout = {
+        title: 'عرض تجريبي لتحليل الجوانب',
+        barmode: 'group',
+        margin: { t: 50, b: 30, l: 40, r: 20 },
+        font: { family: 'Tajawal' }
+    };
+    Plotly.newPlot('demoChart', [trace1], layout, { responsive: true, displayModeBar: false });
+</script>
+{% endblock %}

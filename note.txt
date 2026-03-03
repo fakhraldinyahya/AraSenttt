@@ -1,7 +1,35 @@
-python -m notebook
+ إنشاء بيئة افتراضية
 
-env\Scripts\activate
+نفذ الأمر التالي:
+
+python -m venv venv
+
+ تفعيل البيئة الافتراضية
+
+venv\Scripts\activate
 
 
-python -m notebook
+تثبيت المكتبات المطلوبة
 
+إذا يوجد ملف requirements.txt داخل المشروع:
+
+pip install -r requirements.txt
+
+
+python app.py
+
+فتح المتصفح قوقل كروم او اي متصفح اخر 
+وافتح الرابط التالي :
+http://127.0.0.1:5000
+راح يعرض واجهه الموقع
+
+
+ملاحظة:
+في كل مرة تغلق فيها موجه الأوامر وتعود للعمل على المشروع،
+يجب تفعيل البيئة مرة أخرى باستخدام:
+
+venv\Scripts\activate
+
+ثم تشغيل المشروع هكذا 
+
+python app.py

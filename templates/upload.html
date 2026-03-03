@@ -1,195 +1,152 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AraSent - رفع الملفات</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
-        .upload-area {
-            border: 2px dashed #007bff;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .upload-area:hover { background-color: #f0f8ff; }
-        .upload-area i { font-size: 48px; color: #007bff; }
-        .models-warning {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/"><i class="fas fa-chart-line"></i> AraSent</a>
-            <div class="navbar-nav me-auto">
-                <a class="nav-link" href="/">الرئيسية</a>
-                <a class="nav-link active" href="/upload">رفع ملف</a>
+{% extends "base.html" %}
+
+{% block title %}AraSent - رفع الملفات والتحليل الذكي{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-zone {
+        border: 2px dashed #dee2e6;
+        background: #fff;
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .upload-zone:hover {
+        border-color: var(--primary-color);
+        background: var(--light-bg);
+    }
+
+    .upload-zone i {
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5 fade-in">
+                <h1 class="fw-bold text-primary display-5">ابدأ التحليل الآن</h1>
+                <p class="text-muted fs-5">ارفع ملف التقييمات وسنتولى استخراج الرؤى العميقة فوراً</p>
             </div>
-        </div>
-    </nav>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0"><i class="fas fa-upload"></i> رفع ملف التقييمات</h3>
+            <div class="card p-4 shadow-sm mb-4 fade-in">
+                <form id="uploadForm">
+                    <div class="upload-zone mb-4" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-arrow-up fa-4x"></i>
+                        <h4 class="fw-bold">اضغط للاختيار أو اسحب الملف هنا</h4>
+                        <p class="text-muted">CSV, XLSX, XLS (بحد أقصى 16 ميجابايت)</p>
+                        <input type="file" id="fileInput" name="file" accept=".csv,.xlsx,.xls" style="display: none;">
                     </div>
-                    <div class="card-body">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            الصيغ المدعومة: CSV, Excel (xlsx, xls)
-                            <br>
-                            يجب أن يحتوي الملف على عمود للنص (text, review, comment, نص, تقييم)
-                        </div>
 
-                        <form id="uploadForm" enctype="multipart/form-data">
-                            <div class="upload-area mb-4" onclick="document.getElementById('fileInput').click()">
-                                <i class="fas fa-cloud-upload-alt mb-3"></i>
-                                <h4>اضغط هنا أو اسحب الملف</h4>
-                                <p class="text-muted">CSV أو Excel</p>
-                                <input type="file" id="fileInput" name="file" accept=".csv,.xlsx,.xls" style="display: none;" required>
+                    <div id="filePreview" class="alert alert-primary d-flex align-items-center justify-content-between"
+                        style="display: none !important;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-file-excel fa-2x me-3"></i>
+                            <div>
+                                <h6 id="fileNameDisplay" class="mb-0 fw-bold">filename.xlsx</h6>
+                                <small id="fileSizeDisplay">0 KB</small>
                             </div>
-
-                            <div id="fileInfo" class="alert alert-success" style="display: none;">
-                                <h5>معلومات الملف:</h5>
-                                <p>اسم الملف: <span id="fileName"></span></p>
-                                <p>عدد الصفوف: <span id="fileRows"></span></p>
-                                <p>الأعمدة: <span id="fileColumns"></span></p>
-                            </div>
-
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary btn-lg" id="uploadBtn">
-                                    <i class="fas fa-cloud-upload-alt"></i> رفع وتحليل
-                                </button>
-                                <a href="/" class="btn btn-secondary btn-lg">
-                                    <i class="fas fa-arrow-right"></i> رجوع
-                                </a>
-                            </div>
-                        </form>
-
-                        <div class="progress mt-4" id="progressBar" style="display: none;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                 style="width: 0%">0%</div>
                         </div>
+                        <button type="button" class="btn-close" onclick="resetFile()"></button>
+                    </div>
 
-                        <!-- رسالة الخطأ الخاصة بالنماذج -->
-                        <div class="alert alert-danger mt-4" id="modelsError" style="display: none;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>خطأ: النماذج غير موجودة!</strong>
-                            <p class="mb-0 mt-2">يجب تضمين ملفات النماذج في مجلد models أولاً ليتمكن النظام من تحليل الملفات.</p>
-                        </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold" id="uploadBtn">
+                            <i class="fas fa-magic me-2"></i> معالجة النتائج باستخدام BERT
+                        </button>
+                    </div>
+                </form>
 
-                        <!-- رسالة الخطأ العامة -->
-                        <div class="alert alert-danger mt-4" id="errorMessage" style="display: none;"></div>
+                <div id="progressSection" class="mt-5" style="display: none;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span id="progressStatus" class="fw-bold">جاري الرفع...</span>
+                        <span id="progressPercent" class="text-primary fw-bold">0%</span>
+                    </div>
+                    <div class="progress" style="height: 12px;">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                            style="width: 0%"></div>
                     </div>
                 </div>
 
-                <div class="card mt-4 shadow">
-                    <div class="card-header bg-light">
-                        <h5><i class="fas fa-download"></i> تحميل نموذج</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>يمكنك تحميل نموذج للملف للتأكد من الصيغة الصحيحة:</p>
-                        <a href="/static/sample_reviews.csv" class="btn btn-outline-primary">
-                            <i class="fas fa-file-csv"></i> تحميل نموذج CSV
-                        </a>
-                    </div>
+                <div id="errorAlert" class="alert alert-danger mt-4" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i> <span id="errorText"></span>
+                </div>
+            </div>
+
+            <div class="card p-3 bg-light border-0 fade-in">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle text-primary me-3 fa-lg"></i>
+                    <p class="mb-0 small text-muted">عملية التحليل تعتمد على تقنية **Batch Processing** لضمان أسرع وقت
+                        معالجة ممكن لآلاف السطور.</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const file = document.getElementById('fileInput').files[0];
-            if (!file) { 
-                alert('الرجاء اختيار ملف'); 
-                return; 
-            }
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            const progressBar = document.getElementById('progressBar');
-            const progressBarInner = progressBar.querySelector('.progress-bar');
-            progressBar.style.display = 'block';
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('modelsError').style.display = 'none';
-            
-            try {
-                const uploadResponse = await fetch('/upload', { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                
-                const uploadResult = await uploadResponse.json();
-                
-                // التحقق من وجود خطأ خاص بالنماذج
-                if (uploadResult.models_missing) {
-                    document.getElementById('modelsError').style.display = 'block';
-                    progressBar.style.display = 'none';
-                    return;
-                }
-                
-                if (!uploadResult.success) {
-                    throw new Error(uploadResult.error);
-                }
-                
-                document.getElementById('fileName').textContent = uploadResult.filename;
-                document.getElementById('fileRows').textContent = uploadResult.rows;
-                document.getElementById('fileColumns').textContent = uploadResult.columns.join('، ');
-                document.getElementById('fileInfo').style.display = 'block';
-                
-                progressBarInner.style.width = '50%';
-                progressBarInner.textContent = '50% - جاري التحليل...';
-                
-                const analyzeResponse = await fetch(`/analyze/${uploadResult.filename}`, { 
-                    method: 'POST' 
-                });
-                
-                const analyzeResult = await analyzeResponse.json();
-                
-                if (!analyzeResult.success) {
-                    throw new Error(analyzeResult.error);
-                }
-                
-                progressBarInner.style.width = '100%';
-                progressBarInner.textContent = 'اكتمل التحليل!';
-                
-                setTimeout(() => { 
-                    window.location.href = `/dashboard/${uploadResult.filename}`; 
-                }, 1000);
-                
-            } catch (error) {
-                document.getElementById('errorMessage').textContent = error.message;
-                document.getElementById('errorMessage').style.display = 'block';
-                progressBar.style.display = 'none';
-            }
-        });
+{% block extra_js %}
+<script>
+    const fileInput = document.getElementById('fileInput');
 
-        // إظهار اسم الملف المختار
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const fileName = this.files[0].name;
-                // يمكنك إضافة تأثير بسيط هنا
-            }
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    fileInput.addEventListener('change', function (e) {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            document.getElementById('fileNameDisplay').textContent = file.name;
+            document.getElementById('fileSizeDisplay').textContent = (file.size / 1024).toFixed(1) + ' KB';
+            document.getElementById('filePreview').setAttribute('style', 'display: flex !important');
+            document.querySelector('.upload-zone').style.display = 'none';
+        }
+    });
+
+    function resetFile() {
+        fileInput.value = '';
+        document.getElementById('filePreview').setAttribute('style', 'display: none !important');
+        document.querySelector('.upload-zone').style.display = 'block';
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = fileInput.files[0];
+        if (!file) { alert('برجاء اختيار ملف'); return; }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        document.getElementById('progressSection').style.display = 'block';
+        document.getElementById('errorAlert').style.display = 'none';
+
+        try {
+            updateProgress(30, 'جاري رفع الملف...');
+            const uploadRes = await fetch('/upload', { method: 'POST', body: formData });
+            const uploadData = await uploadRes.json();
+            if (!uploadData.success) throw new Error(uploadData.error);
+
+            updateProgress(65, 'خوارزميات BERT تحلل البيانات...');
+            const analyzeRes = await fetch(`/analyze/${uploadData.filename}`, { method: 'POST' });
+            const analyzeData = await analyzeRes.json();
+            if (!analyzeData.success) throw new Error(analyzeData.error);
+
+            updateProgress(100, 'اكتمل التحليل!');
+            setTimeout(() => window.location.href = `/dashboard/${uploadData.filename}`, 800);
+
+        } catch (err) {
+            document.getElementById('errorText').textContent = err.message;
+            document.getElementById('errorAlert').style.display = 'block';
+            document.getElementById('progressSection').style.display = 'none';
+        }
+    });
+
+    function updateProgress(p, s) {
+        document.getElementById('progressBar').style.width = p + '%';
+        document.getElementById('progressPercent').textContent = p + '%';
+        document.getElementById('progressStatus').textContent = s;
+    }
+</script>
+{% endblock %}

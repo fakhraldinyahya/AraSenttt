@@ -2,12 +2,12 @@ import os
 
 class Config:
     SECRET_KEY = 'arasent_secret_key_2024'
-    UPLOAD_FOLDER = 'static/uploads'
+    UPLOAD_FOLDER = 'uploads'
     ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     
-    ASPECT_MODEL_PATH = 'models/aspect_extraction_model'
-    SENTIMENT_MODEL_PATH = 'models/sentiment_model'
+    ASPECT_MODEL_PATH = 'models/aspect_extractor_final'
+    SENTIMENT_MODEL_PATH = 'models/sentiment_model_final'
     
     ARABERT_MODEL = 'aubmindlab/bert-base-arabertv2'
     
