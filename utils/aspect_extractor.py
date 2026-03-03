@@ -2,7 +2,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 
 class AspectExtractor:
-    def __init__(self, model_path='models/aspect_extraction_model'):
+    def __init__(self, model_path='models/aspect_extractor_final'):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForTokenClassification.from_pretrained(model_path)
