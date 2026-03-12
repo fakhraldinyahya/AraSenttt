@@ -18,10 +18,12 @@ venv\Scripts\activate
 
 تثبيت المكتبات المطلوبة
 
-إذا يوجد ملف requirements.txt داخل المشروع:
 
 pip install -r requirements.txt
 
+نسخ المودلز
+
+تنفذ المشروع 
 
 python app.py
 

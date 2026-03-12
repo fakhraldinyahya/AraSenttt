@@ -15,12 +15,12 @@
     }
 
     .upload-zone:hover {
-        border-color: var(--primary-color);
-        background: var(--light-bg);
+        border-color: var(--primary-green);
+        background: var(--light-gray);
     }
 
     .upload-zone i {
-        color: var(--primary-color);
+        color: var(--primary-green);
         margin-bottom: 20px;
     }
 </style>
@@ -31,7 +31,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="text-center mb-5 fade-in">
-                <h1 class="fw-bold text-primary display-5">ابدأ التحليل الآن</h1>
+                <h1 class="fw-bold text-saudi display-5">ابدأ التحليل الآن</h1>
                 <p class="text-muted fs-5">ارفع ملف التقييمات وسنتولى استخراج الرؤى العميقة فوراً</p>
             </div>
 
@@ -57,7 +57,7 @@
                     </div>
 
                     <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold" id="uploadBtn">
+                        <button type="submit" class="btn btn-saudi btn-lg w-100 py-3 fw-bold" id="uploadBtn">
                             <i class="fas fa-magic me-2"></i> معالجة النتائج باستخدام BERT
                         </button>
                     </div>
@@ -69,7 +69,7 @@
                         <span id="progressPercent" class="text-primary fw-bold">0%</span>
                     </div>
                     <div class="progress" style="height: 12px;">
-                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated progress-bar-saudi"
                             style="width: 0%"></div>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
 
             <div class="card p-3 bg-light border-0 fade-in">
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-info-circle text-primary me-3 fa-lg"></i>
+                    <i class="fas fa-info-circle text-saudi me-3 fa-lg"></i>
                     <p class="mb-0 small text-muted">عملية التحليل تعتمد على تقنية **Batch Processing** لضمان أسرع وقت
                         معالجة ممكن لآلاف السطور.</p>
                 </div>
@@ -131,7 +131,16 @@
             updateProgress(65, 'خوارزميات BERT تحلل البيانات...');
             const analyzeRes = await fetch(`/analyze/${uploadData.filename}`, { method: 'POST' });
             const analyzeData = await analyzeRes.json();
-            if (!analyzeData.success) throw new Error(analyzeData.error);
+
+            if (!analyzeData.success) {
+                if (analyzeData.error_type === 'provider_error') {
+                    // Redirect to dashboard anyway, it will show the fallback modal there
+                    updateProgress(100, 'تنبيه في مزود التحليل، يتم الانتقال...');
+                    setTimeout(() => window.location.href = `/dashboard/${uploadData.filename}`, 1000);
+                    return;
+                }
+                throw new Error(analyzeData.message || analyzeData.error);
+            }
 
             updateProgress(100, 'اكتمل التحليل!');
             setTimeout(() => window.location.href = `/dashboard/${uploadData.filename}`, 800);

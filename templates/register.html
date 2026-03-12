@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}AraSent - إنشاء حساب جديد{% endblock %}
+
+{% block content %}
+<section class="auth-section py-5 d-flex align-items-center" style="min-height: 80vh; background: linear-gradient(135deg, #1c1c1c 0%, #006C35 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden fade-in">
+                    <div class="card-header text-white text-center py-4 border-0" style="background-color: var(--primary-green) !important;">
+                        <h3 class="fw-bold mb-0">انضم إلى AraSent</h3>
+                        <p class="mb-0 opacity-75">ابدأ رحلتك في تحليل البيانات بذكاء</p>
+                    </div>
+                    <div class="card-body p-5">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                          {% if messages %}
+                            {% for category, message in messages %}
+                              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                              </div>
+                            {% endfor %}
+                          {% endif %}
+                        {% endwith %}
+                        
+                        <form method="POST" action="{{ url_for('register') }}">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">اسم المستخدم</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-user text-saudi"></i></span>
+                                    <input type="text" name="username" class="form-control bg-light border-0 py-2" placeholder="أدخل اسم المستخدم" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">البريد الإلكتروني</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-envelope text-saudi"></i></span>
+                                    <input type="email" name="email" class="form-control bg-light border-0 py-2" placeholder="example@domain.com" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">كلمة المرور</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-lock text-saudi"></i></span>
+                                    <input type="password" name="password" class="form-control bg-light border-0 py-2" placeholder="••••••••" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-saudi w-100 py-3 fw-bold rounded-pill shadow-sm transition-transform">
+                                <i class="fas fa-user-plus me-2"></i> إنشاء حساب
+                            </button>
+                        </form>
+                        <div class="text-center mt-4">
+                            <span class="text-muted">لديك حساب بالفعل؟</span>
+                            <a href="{{ url_for('login') }}" class="text-saudi fw-bold text-decoration-none ms-2">تسجيل الدخول</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .transition-transform {
+        transition: transform 0.2s;
+    }
+    .transition-transform:hover {
+        transform: translateY(-3px);
+    }
+    .auth-section {
+        background-attachment: fixed;
+    }
+    .card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+</style>
+{% endblock %}

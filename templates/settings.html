@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}AraSent - الإعدادات الخاصية{% endblock %}
+
+{% block content %}
+<section class="settings-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden fade-in">
+                    <div class="card-header text-white py-4 text-center" style="background-color: var(--primary-green) !important;">
+                        <h3 class="fw-bold mb-0"><i class="fas fa-cog me-2"></i> إعدادات الحساب</h3>
+                    </div>
+                    <div class="card-body p-5">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+
+                        <form method="POST">
+                            <h5 class="fw-bold text-saudi mb-4 pb-2 border-bottom">محرك التحليل</h5>
+
+                            <div
+                                class="form-check form-switch mb-4 p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <label class="form-check-label fw-bold h6 mb-0" for="use_gemini">
+                                        استخدام Google Gemini AI
+                                    </label>
+                                    <p class="text-muted small mb-0">قم بتفعيل هذا الخيار لاستخدام موديل Gemini لنتائج
+                                        أكثر دقة (يتطلب API Key)</p>
+                                </div>
+                                <input class="form-check-input ms-3" type="checkbox" name="use_gemini" id="use_gemini"
+                                    {% if current_user.use_gemini %}checked{% endif %} style="transform: scale(1.5);">
+                            </div>
+
+                            <div id="gemini_key_container"
+                                class="mb-4 {% if not current_user.use_gemini %}d-none{% endif %}">
+                                <label class="form-label fw-bold">Gemini API Key</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><i
+                                            class="fas fa-key text-warning"></i></span>
+                                    <input type="password" name="gemini_api_key" id="gemini_api_key"
+                                        class="form-control bg-light border-0 py-2"
+                                        placeholder="أدخل مفتاح الـ API الخاص بك"
+                                        value="{{ current_user.gemini_api_key or '' }}">
+                                    <button class="btn btn-outline-secondary border-0" type="button"
+                                        onclick="togglePassword()">
+                                        <i class="fas fa-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text mt-2 text-info">
+                                    <i class="fas fa-info-circle me-1"></i> يمكنك الحصول على المفتاح من <a
+                                        href="https://aistudio.google.com/app/apikey" target="_blank">Google AI
+                                        Studio</a> مجاناً.
+                                </div>
+                            </div>
+
+                            <div class="text-end mt-5">
+                                <button type="submit" class="btn btn-saudi px-5 py-3 fw-bold rounded-pill shadow">
+                                    <i class="fas fa-save me-2"></i> حفظ الإعدادات
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const geminiToggle = document.getElementById('use_gemini');
+    const keyContainer = document.getElementById('gemini_key_container');
+
+    geminiToggle.addEventListener('change', function () {
+        if (this.checked) {
+            keyContainer.classList.remove('d-none');
+            keyContainer.classList.add('fade-in');
+        } else {
+            keyContainer.classList.add('d-none');
+        }
+    });
+
+    function togglePassword() {
+        const passwordInput = document.getElementById('gemini_api_key');
+        const icon = document.getElementById('toggleIcon');
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordInput.type = "password";
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>
+{% endblock %}

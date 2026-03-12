@@ -47,10 +47,36 @@
                             بنا</a>
                     </li>
                 </ul>
-                <div class="navbar-nav ms-lg-3">
-                    <a href="/upload" class="btn btn-light fw-bold px-4 rounded-pill">
-                        <i class="fas fa-rocket me-2"></i> حلل الآن
+                <div class="navbar-nav ms-lg-3 d-flex align-items-center">
+                    {% if current_user.is_authenticated %}
+                    <div class="dropdown me-3">
+                        <button class="btn btn-saudi dropdown-toggle fw-bold px-3 rounded-pill" type="button"
+                            data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                            <li><a class="dropdown-item py-2" href="/settings"><i
+                                        class="fas fa-cog me-2 text-muted"></i> الإعدادات</a></li>
+                            {% if current_user.is_admin %}
+                            <li><a class="dropdown-item py-2 text-danger" href="/admin"><i
+                                        class="fas fa-user-shield me-2"></i> لوحة الإدارة</a></li>
+                            {% endif %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item py-2" href="/logout"><i
+                                        class="fas fa-sign-out-alt me-2 text-muted"></i> تسجيل الخروج</a></li>
+                        </ul>
+                    </div>
+                    <a href="/upload" class="btn btn-gold fw-bold px-4 rounded-pill">
+                        <i class="fas fa-plus me-2"></i> تحليل جديد
                     </a>
+                    {% else %}
+                    <a href="/login" class="nav-link me-3 fw-bold">تسجيل الدخول</a>
+                    <a href="/register" class="btn btn-gold fw-bold px-4 rounded-pill">
+                        ابدأ مجاناً
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -66,7 +92,7 @@
         <div class="container">
             <div class="row g-4 mb-4">
                 <div class="col-lg-4">
-                    <h4 class="fw-bold mb-4 text-primary"><i class="fas fa-chart-line me-2"></i> AraSent</h4>
+                    <h4 class="fw-bold mb-4 text-saudi"><i class="fas fa-chart-line me-2"></i> AraSent</h4>
                     <p class="text-secondary">الخيار الأول للشركات في الوطن العربي لتحويل التقييمات والنصوص إلى بيانات
                         استراتيجية مدعومة بأقوى تقنيات الذكاء الاصطناعي.</p>
                     <div class="social-links d-flex gap-3">
@@ -90,9 +116,9 @@
                 <div class="col-lg-3">
                     <h6 class="fw-bold mb-4">تواصل معنا</h6>
                     <ul class="list-unstyled text-secondary">
-                        <li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> info@arasent.ai</li>
-                        <li class="mb-2"><i class="fas fa-phone me-2 text-primary"></i> +966 5XX XXX XXX</li>
-                        <li class="mb-2"><i class="fas fa-location-dot me-2 text-primary"></i> الرياض، المملكة العربية
+                        <li class="mb-2"><i class="fas fa-envelope me-2 text-saudi"></i> info@arasent.ai</li>
+                        <li class="mb-2"><i class="fas fa-phone me-2 text-saudi"></i> +966 5XX XXX XXX</li>
+                        <li class="mb-2"><i class="fas fa-location-dot me-2 text-saudi"></i> الرياض، المملكة العربية
                             السعودية</li>
                     </ul>
                 </div>

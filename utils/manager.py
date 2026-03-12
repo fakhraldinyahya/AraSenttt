@@ -1,5 +1,6 @@
 import os
 import threading
+import time
 from utils.preprocessing import ArabicTextPreprocessor
 from utils.aspect_extractor import AspectExtractor
 from utils.sentiment_classifier import SentimentClassifier
@@ -30,7 +31,7 @@ class ModelManager:
 
         self.loading = True
         try:
-            print("🚀 Loading AraSent Models...")
+            print("Loading AraSent Models...")
             self.preprocessor = ArabicTextPreprocessor()
             
             # Use paths from config or defaults
@@ -40,10 +41,10 @@ class ModelManager:
             self.aspect_extractor = AspectExtractor(model_path=aspect_path)
             self.sentiment_classifier = SentimentClassifier(model_path=sentiment_path)
             
-            print("✅ Models Loaded Successfully!")
+            print("Models Loaded Successfully!")
             return True
         except Exception as e:
-            print(f"❌ Error Loading Models: {e}")
+            print(f"Error Loading Models: {e}")
             return False
         finally:
             self.loading = False
@@ -56,11 +57,20 @@ class ModelManager:
         if not self.preprocessor:
             self.load_models()
 
+        total_start = time.time()
         results = []
+        
+        print(f"Starting analysis for {len(texts)} reviews...")
+        
+        # 0. Cleaning
+        clean_start = time.time()
         cleaned_texts = [self.preprocessor.clean_text(str(t)) for t in texts]
+        print(f"Cleaning took: {time.time() - clean_start:.2f}s")
         
         # 1. Batch predict aspects (Now fully batch!)
+        aspect_start = time.time()
         all_aspects_list = self.aspect_extractor.predict_aspects_batch(cleaned_texts)
+        print(f"Aspect Extraction took: {time.time() - aspect_start:.2f}s")
         
         for i, text in enumerate(texts):
             cleaned = cleaned_texts[i]
@@ -75,7 +85,9 @@ class ModelManager:
             })
 
         # 2. Batch predict overall sentiment
+        sentiment_start = time.time()
         overall_sentiments = self.sentiment_classifier.predict_sentiment_batch(cleaned_texts)
+        print(f"Overall Sentiment took: {time.time() - sentiment_start:.2f}s")
         
         # 3. Handle Aspect-based Sentiment in batches if possible
         # Collect all (text, aspect) pairs for a single large batch call
@@ -90,13 +102,27 @@ class ModelManager:
                 aspect_map.append((i, aspect))
 
         if all_aspect_texts:
-            batch_aspect_sentiments = self.sentiment_classifier.predict_sentiment_batch(all_aspect_texts, all_aspect_labels)
+            aspect_sentiment_start = time.time()
+            batch_aspect_sentiments = []
+            
+            # Internal chunking to prevent memory crashes (OOM)
+            chunk_size = 16 
+            for i in range(0, len(all_aspect_texts), chunk_size):
+                chunk_texts = all_aspect_texts[i:i + chunk_size]
+                chunk_labels = all_aspect_labels[i:i + chunk_size]
+                chunk_results = self.sentiment_classifier.predict_sentiment_batch(chunk_texts, chunk_labels)
+                batch_aspect_sentiments.extend(chunk_results)
+            
+            print(f"Aspect-based Sentiment ({len(all_aspect_texts)} items) took: {time.time() - aspect_sentiment_start:.2f}s")
+            
             for (res_idx, aspect_name), sentiment_res in zip(aspect_map, batch_aspect_sentiments):
                 results[res_idx]['aspect_sentiments'].append({
                     'aspect': aspect_name,
                     'sentiment': sentiment_res['sentiment'],
                     'confidence': sentiment_res['confidence']
                 })
+        
+        print(f"Total Analysis Pipeline Time: {time.time() - total_start:.2f}s")
 
         # Final Formatting
         final_results = []
