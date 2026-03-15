@@ -14,11 +14,14 @@ class SentimentClassifier:
         # نقرأ الترتيب الحقيقي من الموديل نفسه
         self.id2label = self.model.config.id2label
         
-        # خريطة تحويل للعربية
+        # خريطة تحويل للعربية (دعم مختلف الحالات)
         self.arabic_map = {
             "positive": "إيجابي",
             "negative": "سلبي",
-            "neutral": "محايد"
+            "neutral": "محايد",
+            "Positive": "إيجابي",
+            "Negative": "سلبي",
+            "Neutral": "محايد"
         }
 
     def predict_sentiment(self, text: str, aspect: str = None):

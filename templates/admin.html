@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}AraSent - لوحة تحكم المسؤول{% endblock %}
+
+{% block content %}
+<section class="admin-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-lg border-0 rounded-4 fade-in">
+                    <div class="card-header text-white py-4 d-flex align-items-center justify-content-between" style="background-color: var(--dark-charcoal) !important; border-bottom: 2px solid var(--gold-accent);">
+                        <h3 class="fw-bold mb-0"><i class="fas fa-user-shield me-2 text-gold"></i> لوحة التحكم
+                            العالمية</h3>
+                        <span class="badge bg-danger">مسؤول</span>
+                    </div>
+                    <div class="card-body p-5">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+
+                        <form method="POST">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="p-4 bg-light rounded-4 h-100 shadow-sm border">
+                                        <h5 class="fw-bold mb-3">حدود الضيوف (Guest Limits)</h5>
+                                        <p class="text-muted small mb-4">حدد عدد الصفوف التي يمكن لغير المسجلين تحليلها
+                                            في الملف الواحد لتقليل استهلاك الموارد.</p>
+
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white border-0"><i
+                                                    class="fas fa-list-ol text-saudi"></i></span>
+                                            <input type="number" name="guest_analysis_limit"
+                                                class="form-control border-0 py-3" value="{{ guest_limit }}" min="1"
+                                                max="1000">
+                                            <span class="input-group-text bg-white border-0">صف</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div
+                                        class="p-4 bg-light rounded-4 h-100 shadow-sm border border-primary border-opacity-25">
+                                        <h5 class="fw-bold mb-3">إحصائيات النظام السريعة</h5>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                                <i class="fas fa-users text-saudi"></i>
+                                            </div>
+                                            <div>
+                                                <div class="small text-muted">إجمالي المستخدمين</div>
+                                                <div class="h5 mb-0 fw-bold">تحميل...</div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                                                <i class="fas fa-database text-gold"></i>
+                                            </div>
+                                            <div>
+                                                <div class="small text-muted">حجم قاعدة البيانات</div>
+                                                <div class="h5 mb-0 fw-bold">3.2 MB</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-5">
+                                <button type="submit"
+                                    class="btn btn-saudi px-5 py-3 fw-bold rounded-pill shadow-lg hover-scale">
+                                    <i class="fas fa-check-circle me-2"></i> حفظ التغييرات العالمية
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hover-scale {
+        transition: transform 0.2s;
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.03);
+    }
+</style>
+{% endblock %}

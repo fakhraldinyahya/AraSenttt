@@ -15,9 +15,9 @@
                     filename }}</span></p>
         </div>
         <div class="d-flex gap-2">
-            <a href="/summary/{{ filename }}" class="btn btn-outline-primary fw-bold"><i
+            <a href="/summary/{{ filename }}" class="btn btn-outline-saudi fw-bold"><i
                     class="fas fa-file-invoice me-2"></i>الملخص التنفيذي</a>
-            <a href="/download/{{ filename }}" class="btn btn-primary fw-bold"><i class="fas fa-download me-2"></i>تحميل
+            <a href="/download/{{ filename }}" class="btn btn-saudi fw-bold"><i class="fas fa-download me-2"></i>تحميل
                 البيانات</a>
         </div>
     </div>
@@ -65,7 +65,17 @@
     <div class="row g-4 mb-5 fade-in" style="animation-delay: 0.2s;">
         <div class="col-lg-6">
             <div class="card h-100 shadow-sm">
-                <div class="card-header"><i class="fas fa-chart-pie me-2 text-primary"></i> توزيع المشاعر العام</div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-pie me-2 text-saudi"></i> توزيع المشاعر العام</span>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-saudi active" onclick="changeSentimentChart('pie', this)"
+                            title="دائري"><i class="fas fa-chart-pie"></i></button>
+                        <button class="btn btn-outline-saudi" onclick="changeSentimentChart('bar', this)"
+                            title="أعمدة"><i class="fas fa-chart-bar"></i></button>
+                        <button class="btn btn-outline-saudi" onclick="changeSentimentChart('line', this)"
+                            title="خطي"><i class="fas fa-chart-line"></i></button>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div id="sentimentChart" style="height: 400px;"></div>
                 </div>
@@ -73,7 +83,19 @@
         </div>
         <div class="col-lg-6">
             <div class="card h-100 shadow-sm">
-                <div class="card-header"><i class="fas fa-chart-bar me-2 text-primary"></i> تحليل الجوانب (ABSA)</div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-bar me-2 text-saudi"></i> تحليل الجوانب (ABSA)</span>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-saudi active" onclick="changeAspectChart('bar', this)"
+                            title="أعمدة"><i class="fas fa-chart-bar"></i></button>
+                        <button class="btn btn-outline-saudi" onclick="changeAspectChart('horizontalBar', this)"
+                            title="أعمدة أفقية"><i class="fas fa-align-left"></i></button>
+                        <button class="btn btn-outline-saudi" onclick="changeAspectChart('line', this)" title="خطي"><i
+                                class="fas fa-chart-line"></i></button>
+                        <button class="btn btn-outline-saudi" onclick="changeAspectChart('area', this)" title="مساحة"><i
+                                class="fas fa-chart-area"></i></button>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div id="aspectChart" style="height: 400px;"></div>
                 </div>
@@ -81,9 +103,34 @@
         </div>
     </div>
 
+    <!-- Pivot Table Section -->
+    <div class="card shadow-sm mb-5 fade-in" style="animation-delay: 0.25s;">
+        <div class="card-header bg-white">
+            <i class="fas fa-table me-2 text-primary"></i> تحليل البيانات المتقدم (Pivot Table)
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 text-center align-middle">
+                    <thead class="bg-light">
+                        <tr id="pivotHeader">
+                            <th>الجانب / الحالة</th>
+                            <th class="text-success">إيجابي</th>
+                            <th class="text-danger">سلبي</th>
+                            <th class="text-warning">محايد</th>
+                            <th class="bg-light fw-bold">الإجمالي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pivotBody">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm fade-in" style="animation-delay: 0.3s;">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-list me-2 text-primary"></i> تفاصيل التقييمات</span>
+            <span><i class="fas fa-list me-2 text-saudi"></i> تفاصيل التقييمات</span>
             <div class="input-group w-25">
                 <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
                 <input type="text" id="tableSearch" class="form-control border-start-0 ps-0" placeholder="بحث...">
@@ -112,35 +159,102 @@
         </div>
     </div>
 </div>
+</div>
+
+<!-- Aspect Detail Modal -->
+<div class="modal fade" id="aspectDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header text-white border-0 p-4" style="background-color: var(--primary-green);">
+                <h5 class="modal-title fw-bold"><i class="fas fa-search-plus me-2"></i>تفاصيل الجوانب المرصودة</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2 small"><i class="fas fa-quote-right me-1"></i> النص الأصلي:</h6>
+                    <p id="modalOriginalText" class="p-3 bg-light rounded text-dark fst-italic"></p>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>الجانب</th>
+                                <th>المشاعر</th>
+                                <th>الثقة</th>
+                                <th>الشهادة (الدليل)</th>
+                                <th>النوع</th>
+                            </tr>
+                        </thead>
+                        <tbody id="aspectDetailsBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fallback Modal -->
+<div class="modal fade" id="fallbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-warning bg-opacity-10 border-0 p-4">
+                <h5 class="modal-title fw-bold text-warning"><i class="fas fa-exclamation-triangle me-2"></i>تنبيه في
+                    محرك التحليل</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-robot fa-3x text-warning opacity-50"></i>
+                </div>
+                <h5 class="fw-bold mb-3">فشل الاتصال بـ Gemini</h5>
+                <p class="text-muted" id="fallbackErrorMessage"></p>
+                <p class="fw-bold text-primary">هل تود المتابعة باستخدام الموديلات المحلية (BERT) كبديل؟</p>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" onclick="fallbackToLocal()">نعم، استمر
+                    محلياً</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    let currentData = null;
+    let sentimentChartType = 'pie';
+    let aspectChartType = 'bar';
+
     async function loadDashboard() {
         try {
             const response = await fetch(`/results/{{ filename }}`);
             const data = await response.json();
-            if (!data.success) throw new Error(data.error);
+
+            if (!data.success) {
+                if (data.error_type === 'provider_error') {
+                    showFallbackModal(data.message);
+                    return;
+                }
+                throw new Error(data.message || data.error);
+            }
 
             const { stats, results } = data;
+            currentData = results;
 
             document.getElementById('totalReviews').textContent = stats.total_reviews;
             document.getElementById('positiveCount').textContent = stats.sentiment_distribution['إيجابي'] || 0;
             document.getElementById('negativeCount').textContent = stats.sentiment_distribution['سلبي'] || 0;
             document.getElementById('neutralCount').textContent = stats.sentiment_distribution['محايد'] || 0;
 
-            const pieData = [{
-                values: [stats.sentiment_distribution['إيجابي'], stats.sentiment_distribution['سلبي'], stats.sentiment_distribution['محايد']],
-                labels: ['إيجابي', 'سلبي', 'محايد'],
-                type: 'pie',
-                marker: { colors: ['#28a745', '#dc3545', '#ffc107'] },
-                hole: 0.4,
-                textinfo: 'percent',
-                font: { family: 'Tajawal' }
-            }];
-            Plotly.newPlot('sentimentChart', pieData, { margin: { t: 0, b: 0, l: 0, r: 0 } });
-
-            drawAspectChart(results);
+            updateCharts();
+            drawPivotTable(results);
 
             const tableBody = document.getElementById('reviewsTableBody');
             tableBody.innerHTML = '';
@@ -150,17 +264,28 @@
                     review.overall_sentiment === 'سلبي' ? 'danger' : 'warning';
 
                 const aspectsHtml = review.aspects.map(a =>
-                    `<span class="badge bg-light text-dark border border-secondary border-opacity-10 me-1">${a.aspect} (${a.sentiment})</span>`
+                    `<span class="badge bg-light text-dark border border-secondary border-opacity-10 me-1">${a.aspect}</span>`
                 ).join('') || '<span class="text-muted small">عام</span>';
 
+                // Add data to row for later use
+                row.dataset.reviewData = JSON.stringify(review);
+
                 row.innerHTML = `
-                    <td><div class="text-truncate" style="max-width: 500px;" title="${review.original_text}">${review.original_text}</div></td>
+                    <td>
+                        <div class="text-truncate" style="max-width: 500px;" title="${review.original_text}">${review.original_text}</div>
+                        ${review.logic_explanation ? `<div class="mt-1 small text-primary"><i class="fas fa-lightbulb me-1"></i> <span class="opacity-75">${review.logic_explanation}</span></div>` : ''}
+                    </td>
                     <td><span class="badge bg-${sClass}">${review.overall_sentiment}</span></td>
-                    <td>${aspectsHtml}</td>
+                    <td class="clickable-aspects" style="cursor: pointer;" onclick="showAspectDetails(this)">
+                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                            ${aspectsHtml}
+                            <i class="fas fa-external-link-alt ms-auto small text-muted opacity-50"></i>
+                        </div>
+                    </td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px;">
-                                <div class="progress-bar bg-primary" style="width: ${review.confidence * 100}%"></div>
+                            <div class="progress flex-grow-1">
+                                <div class="progress-bar progress-bar-saudi" style="width: ${review.confidence * 100}%"></div>
                             </div>
                             <span class="small fw-bold">${(review.confidence * 100).toFixed(0)}%</span>
                         </div>
@@ -174,41 +299,210 @@
         }
     }
 
-    function drawAspectChart(reviews) {
+    function showAspectDetails(cell) {
+        const review = JSON.parse(cell.parentElement.dataset.reviewData);
+        if (!review.aspects || review.aspects.length === 0) return;
+
+        document.getElementById('modalOriginalText').textContent = review.original_text;
+        const body = document.getElementById('aspectDetailsBody');
+        body.innerHTML = '';
+
+        review.aspects.forEach(a => {
+            const sClass = a.sentiment === 'إيجابي' ? 'success' :
+                a.sentiment === 'سلبي' ? 'danger' : 'warning';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="fw-bold">${a.aspect}</span></td>
+                <td><span class="badge bg-${sClass}">${a.sentiment}</span></td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="progress flex-grow-1" style="width: 60px;">
+                            <div class="progress-bar progress-bar-saudi" style="width: ${a.confidence * 100}%"></div>
+                        </div>
+                        <span class="small">${(a.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                </td>
+                <td class="small">${a.evidence || '<span class="text-muted">-</span>'}</td>
+                <td>
+                    <span class="badge ${a.implicit ? 'bg-info' : 'bg-secondary'}">
+                        ${a.implicit ? 'ضمني' : 'صريح'}
+                    </span>
+                </td>
+            `;
+            body.appendChild(tr);
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById('aspectDetailModal'));
+        modal.show();
+    }
+
+    function changeSentimentChart(type, btn) {
+        sentimentChartType = type;
+        const btnGroup = btn.closest('.btn-group');
+        btnGroup.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateCharts();
+    }
+
+    function changeAspectChart(type, btn) {
+        aspectChartType = type;
+        const btnGroup = btn.closest('.btn-group');
+        btnGroup.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateCharts();
+    }
+
+    function updateCharts() {
+        if (!currentData) return;
+        drawSentimentChart(currentData, sentimentChartType);
+        drawAspectChart(currentData, aspectChartType);
+    }
+
+    function drawSentimentChart(results, type) {
+        const stats = { 'إيجابي': 0, 'سلبي': 0, 'محايد': 0 };
+        results.forEach(r => {
+            if (stats[r.overall_sentiment] !== undefined) stats[r.overall_sentiment]++;
+        });
+
+        const labels = Object.keys(stats);
+        const values = Object.values(stats);
+        const colors = ['#006C35', '#dc3545', '#D4AF37']; // Saudi Green, Soft Red, Gold
+
+        let data = [];
+        let layout = {
+            margin: { t: 10, b: 40, l: 40, r: 10 },
+            font: { family: 'Tajawal' }
+        };
+
+        if (type === 'pie') {
+            data = [{
+                values, labels, type: 'pie',
+                marker: { colors }, hole: 0.4, textinfo: 'percent+label'
+            }];
+        } else if (type === 'bar') {
+            data = [{
+                x: labels, y: values, type: 'bar',
+                marker: { color: colors }
+            }];
+        } else if (type === 'line') {
+            data = [{
+                x: labels, y: values, type: 'scatter', mode: 'lines+markers',
+                line: { color: '#006C35', shape: 'spline' },
+                fill: 'tozeroy'
+            }];
+        }
+
+        Plotly.newPlot('sentimentChart', data, layout, { responsive: true });
+    }
+
+    function drawAspectChart(reviews, type) {
         const aspectsList = ['الطعام', 'الخدمة', 'السعر', 'الأجواء', 'النظافة', 'الموقع', 'التوصيل'];
         const stats = {};
         aspectsList.forEach(a => stats[a] = { 'إيجابي': 0, 'سلبي': 0, 'محايد': 0 });
 
         reviews.forEach(review => {
             review.aspects.forEach(ai => {
-                for (let key in stats) {
-                    if (ai.aspect.includes(key) || key.includes(ai.aspect)) {
-                        stats[key][ai.sentiment]++;
-                        break;
-                    }
+                if (stats[ai.aspect]) {
+                    stats[ai.aspect][ai.sentiment]++;
                 }
             });
         });
 
         const x = Object.keys(stats);
-        const trace = (label, color) => ({
-            x, y: x.map(a => stats[a][label]),
-            name: label, type: 'bar', marker: { color }
-        });
+        const sentiments = ['إيجابي', 'سلبي', 'محايد'];
+        const colors = ['#006C35', '#dc3545', '#D4AF37'];
+
+        const data = sentiments.map((s, i) => ({
+            name: s,
+            type: (type === 'horizontalBar') ? 'bar' : (type === 'area' ? 'scatter' : (type === 'line' ? 'scatter' : 'bar')),
+            x: (type === 'horizontalBar') ? x.map(a => stats[a][s]) : x,
+            y: (type === 'horizontalBar') ? x : x.map(a => stats[a][s]),
+            orientation: (type === 'horizontalBar') ? 'h' : 'v',
+            mode: (type === 'area' || type === 'line') ? 'lines+markers' : undefined,
+            fill: (type === 'area') ? 'tozeroy' : undefined,
+            marker: { color: colors[i] },
+            stackgroup: (type === 'area') ? 'one' : undefined
+        }));
 
         const layout = {
-            barmode: 'group',
-            margin: { t: 20, b: 40, l: 40, r: 20 },
-            xaxis: { tickangle: -45 },
-            legend: { orientation: 'h', y: -0.2 },
+            barmode: (type === 'horizontalBar' || type === 'bar') ? 'group' : undefined,
+            margin: { t: 20, b: 60, l: 80, r: 20 },
+            xaxis: { tickangle: (type === 'horizontalBar') ? 0 : -45 },
+            legend: { orientation: 'h', y: -0.3 },
             font: { family: 'Tajawal' }
         };
 
-        Plotly.newPlot('aspectChart', [
-            trace('إيجابي', '#28a745'),
-            trace('سلبي', '#dc3545'),
-            trace('محايد', '#ffc107')
-        ], layout);
+        Plotly.newPlot('aspectChart', data, layout, { responsive: true });
+    }
+
+    function drawPivotTable(results) {
+        const aspectsList = ['الطعام', 'الخدمة', 'السعر', 'الأجواء', 'النظافة', 'الموقع', 'التوصيل'];
+        const pivotData = {};
+        aspectsList.forEach(a => pivotData[a] = { 'إيجابي': 0, 'سلبي': 0, 'محايد': 0, 'total': 0 });
+
+        results.forEach(review => {
+            review.aspects.forEach(ai => {
+                if (pivotData[ai.aspect]) {
+                    pivotData[ai.aspect][ai.sentiment]++;
+                    pivotData[ai.aspect].total++;
+                }
+            });
+        });
+
+        const body = document.getElementById('pivotBody');
+        body.innerHTML = '';
+
+        aspectsList.forEach(aspect => {
+            const row = pivotData[aspect];
+            if (row.total === 0) return;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="fw-bold bg-light text-start ps-3">${aspect}</td>
+                <td>
+                    <div class="fw-bold text-success">${row['إيجابي']}</div>
+                    <small class="text-muted">${((row['إيجابي'] / row.total) * 100).toFixed(1)}%</small>
+                </td>
+                <td>
+                    <div class="fw-bold text-danger">${row['سلبي']}</div>
+                    <small class="text-muted">${((row['سلبي'] / row.total) * 100).toFixed(1)}%</small>
+                </td>
+                <td>
+                    <div class="fw-bold text-warning">${row['محايد']}</div>
+                    <small class="text-muted">${((row['محايد'] / row.total) * 100).toFixed(1)}%</small>
+                </td>
+                <td class="bg-light fw-bold">${row.total}</td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    function showFallbackModal(message) {
+        document.getElementById('fallbackErrorMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('fallbackModal'));
+        modal.show();
+    }
+
+    async function fallbackToLocal() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('fallbackModal'));
+        modal.hide();
+
+        document.getElementById('reviewsTableBody').innerHTML = `<tr><td colspan="4" class="text-center py-5">
+            <div class="spinner-border text-primary me-2"></div> جاري التبديل للموديلات المحلية...
+        </td></tr>`;
+
+        try {
+            const response = await fetch(`/analyze/{{ filename }}?force_local=true`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                throw new Error(data.message || data.error);
+            }
+        } catch (err) {
+            alert("خطأ: " + err.message);
+        }
     }
 
     loadDashboard();
