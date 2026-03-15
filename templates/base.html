@@ -55,6 +55,8 @@
                             <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                            <li><a class="dropdown-item py-2" href="/history"><i
+                                        class="fas fa-history me-2 text-saudi"></i> سجل تحليلاتي</a></li>
                             <li><a class="dropdown-item py-2" href="/settings"><i
                                         class="fas fa-cog me-2 text-muted"></i> الإعدادات</a></li>
                             {% if current_user.is_admin %}

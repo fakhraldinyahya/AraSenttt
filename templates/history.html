@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}سجل التحليلات - AraSent{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .history-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    .model-badge {
+        background-color: var(--light-gray);
+        color: var(--dark-green);
+        border: 1px solid var(--primary-green);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+    }
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .table thead th {
+        background-color: var(--primary-green);
+        color: white;
+        border: none;
+        padding: 15px;
+        font-weight: 600;
+    }
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    <div class="row mb-5 fade-in">
+        <div class="col-12 text-center">
+            <h1 class="fw-bold text-saudi display-5">سجل التحليلات السابقة</h1>
+            <p class="text-muted fs-5">استعرض تقارير التقييمات التي قمت بتحليلها مسبقاً في أي وقت</p>
+        </div>
+    </div>
+
+    <div class="row fade-in" style="animation-delay: 0.2s;">
+        <div class="col-12">
+            {% if analyses %}
+            <div class="table-responsive table-container">
+                <table class="table table-hover mb-0 text-center">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">اسم الملف</th>
+                            <th scope="col">تاريخ التحليل</th>
+                            <th scope="col">الموديل المستخدم</th>
+                            <th scope="col">إجمالي التقييمات</th>
+                            <th scope="col">نظرة عامة</th>
+                            <th scope="col">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analysis in analyses %}
+                        <tr id="row-{{ analysis.id }}">
+                            <th scope="row">{{ loop.index }}</th>
+                            <td class="fw-bold text-start">
+                                <i class="fas fa-file-excel text-success me-2"></i>
+                                {{ analysis.original_filename }}
+                            </td>
+                            <td dir="ltr">{{ analysis.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                {% if analysis.model_used == 'gemini' %}
+                                    <span class="model-badge"><i class="fas fa-robot"></i> Gemini AI</span>
+                                {% elif analysis.model_used == 'local_multitask' %}
+                                    <span class="model-badge"><i class="fas fa-bolt"></i> مدمج (MultiTask)</span>
+                                {% else %}
+                                    <span class="model-badge"><i class="fas fa-cogs"></i> كلاسيكي (BERT)</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-secondary rounded-pill fs-6">{{ analysis.total_reviews }}</span></td>
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <span class="text-success" title="إيجابي"><i class="fas fa-smile"></i> {{ analysis.positive_count }}</span>
+                                    <span class="text-danger" title="سلبي"><i class="fas fa-frown"></i> {{ analysis.negative_count }}</span>
+                                    <span class="text-secondary" title="محايد"><i class="fas fa-meh"></i> {{ analysis.neutral_count }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('dashboard', filename=analysis.internal_filename ~ '.csv') }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                    <i class="fas fa-chart-line me-1"></i> الداشبورد
+                                </a>
+                                <button onclick="deleteAnalysis({{ analysis.id }})" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center p-5 bg-white rounded shadow-sm">
+                <img src="{{ url_for('static', filename='images/empty_state.svg') }}" alt="لا يوجد تحليلات" style="width: 200px; opacity: 0.5;" onerror="this.style.display='none'">
+                <i class="fas fa-folder-open fa-4x text-muted mb-3" style="display: {{ 'none' if empty_image else 'block' }}"></i>
+                <h3 class="text-muted">لا يوجد أي تحليلات سابقة</h3>
+                <p class="text-muted">قم برفع ملف وتقييمه لتتمكن من العثور عليه هنا لاحقاً.</p>
+                <a href="{{ url_for('upload_file') }}" class="btn btn-saudi mt-3 px-4 py-2 rounded-pill">
+                    <i class="fas fa-cloud-upload-alt me-2"></i> ابدأ التحليل الآن
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function deleteAnalysis(id) {
+        Swal.fire({
+            title: 'هل أنت متأكد؟',
+            text: "لن تتمكن من استعادة هذا التحليل والملفات المرتبطة به!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'نعم، احذفه!',
+            cancelButtonText: 'إلغاء'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/history/delete/${id}`, {
+                    method: 'POST',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'تم الحذف!',
+                            'تم حذف التحليل بنجاح.',
+                            'success'
+                        );
+                        // Hide row with animation
+                        const row = document.getElementById(`row-${id}`);
+                        row.style.transition = "all 0.5s ease";
+                        row.style.opacity = "0";
+                        row.style.transform = "translateX(50px)";
+                        setTimeout(() => {
+                            row.remove();
+                            // If table is empty, reload page to show empty state
+                            if(document.querySelectorAll('tbody tr').length === 0) {
+                                window.location.reload();
+                            }
+                        }, 500);
+                    } else {
+                        Swal.fire('خطأ', 'حدث خطأ أثناء الحذف: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('خطأ', 'تعذر الاتصال بالخادم', 'error');
+                });
+            }
+        })
+    }
+</script>
+{% endblock %}

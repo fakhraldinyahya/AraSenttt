@@ -11,11 +11,12 @@ import plotly.graph_objects as go
 from datetime import datetime
 import re
 import ast
+import hashlib
 import markdown
 
 from config import Config
 from extensions import db, bcrypt, login_manager
-from db_models.user import User, GlobalSetting
+from db_models.user import User, GlobalSetting, AnalysisHistory
 from functools import wraps
 from utils.gemini_analyzer import GeminiAnalyzer
 
@@ -162,30 +163,74 @@ def upload_file():
                 return jsonify({"error": f"Unsupported file format: {file_ext}"}), 400
             
             # Check limits for guests
+            is_sliced = False
+            slice_message = ""
             if not current_user.is_authenticated:
                 limit_setting = GlobalSetting.query.filter_by(key='guest_analysis_limit').first()
-                limit = int(limit_setting.value) if limit_setting else 10
+                limit = int(limit_setting.value) if limit_setting else 50
                 if len(df) > limit:
-                    os.remove(filepath)
-                    return jsonify({'error': f'عذراً، كضيف يمكنك تحليل {limit} أسطر فقط. يرجى تسجيل الدخول للتحليل غير المحدود.'}), 400
+                    df = df.head(limit)
+                    is_sliced = True
+                    slice_message = f"تم تحليل أول {limit} تقييمات كعينة تجريبية. لمعاينة الملف كاملاً، تفضل بإنشاء حساب مجاني!"
             
             raw_path = os.path.join(app.config['DATA_RAW_FOLDER'], f'{datetime.now().strftime("%Y%m%d_%H%M%S")}_{filename}')
             df.to_csv(raw_path, index=False)
             
-            return jsonify({'success': True, 'filename': filename, 'rows': len(df), 'columns': list(df.columns)})
+            return jsonify({
+                'success': True, 
+                'filename': filename, 
+                'rows': len(df), 
+                'columns': list(df.columns),
+                'sliced': is_sliced,
+                'slice_message': slice_message
+            })
         
         return jsonify({'error': 'نوع الملف غير مسموح'}), 400
     return render_template('upload.html')
 
 @app.route('/analyze/<filename>', methods=['POST'])
 def analyze_file(filename):
-    base_name = os.path.splitext(filename)[0]
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'الملف غير موجود'}), 404
+        
+    if filename.endswith('.csv'):
+        df = pd.read_csv(filepath)
+    else:
+        df = pd.read_excel(filepath)
+    
+    text_column = next((col for col in ['text', 'review', 'comment', 'نص', 'تقييم'] if col in df.columns), None)
+    if text_column is None:
+        return jsonify({'error': 'لم يتم العثور على عمود النص في الملف'}), 400
+    
+    # === تنظيف البيانات قبل التحليل ===
+    df = df.dropna(subset=[text_column])
+    df = df.drop_duplicates(subset=[text_column])
+    texts = df[text_column].astype(str).str.replace('\n', ' ', regex=False).str.replace('\r', ' ', regex=False).str.strip().tolist()
+    texts = [t for t in texts if t]
+    
+    if not texts:
+        return jsonify({'error': 'الملف لا يحتوي على أي نصوص صالحة للتحليل بعد التنظيف'}), 400
+    
+    force_local = request.args.get('force_local') == 'true'
+    # اختيار الموديل من المستخدم: multitask | gemini | local
+    selected_model = request.args.get('model', 'local')
+    provider = selected_model
+
+    # === نظام التخزين المؤقت الذكي (Smart Cashing) ===
+    # ندمج كل النصوص مع اسم الموديل المختار ليكون البصمة فريدة لكل ملف+موديل
+    content_to_hash = "".join(texts) + "_" + selected_model
+    file_hash = hashlib.sha256(content_to_hash.encode('utf-8')).hexdigest()
+    
+    # الـ base_name الجديد لكل العمليات هو الـ Hash 
+    base_name = file_hash
     processed_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{base_name}.csv')
     summary_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{base_name}.json')
     
-    # Use Cache if exists
+    # === إذا كانت النتيجة موجودة مسبقاً (Cache Hit) ===
     if os.path.exists(processed_path):
         try:
+            print(f" Cache Hit! Returning previous analysis for model {selected_model}")
             df_cached = pd.read_csv(processed_path)
             results = []
             for _, row in df_cached.iterrows():
@@ -204,69 +249,80 @@ def analyze_file(filename):
                     'logic_explanation': row.get('logic_explanation', ''),
                     'provider': row.get('provider', 'cached')
                 })
-            return jsonify({'success': True, 'results': results, 'stats': _calculate_stats(results)})
+            stats = _calculate_stats(results)
+            
+            # تسجيل العملية في History كـ (إعادة اطلاع) بدون إعادة تحليل
+            if current_user.is_authenticated:
+                # نحفظ السجل حتى تظهر في قائمة تاريخ المستخدم
+                history_record = AnalysisHistory(
+                    user_id=current_user.id,
+                    original_filename=os.path.splitext(filename)[0],
+                    internal_filename=base_name,
+                    model_used=provider,
+                    total_reviews=stats['total_reviews'],
+                    positive_count=stats['sentiment_distribution']['إيجابي'],
+                    negative_count=stats['sentiment_distribution']['سلبي'],
+                    neutral_count=stats['sentiment_distribution']['محايد']
+                )
+                db.session.add(history_record)
+                db.session.commit()
+                
+            return jsonify({'success': True, 'results': results, 'stats': stats, 'cached': True, 'base_name': base_name})
         except Exception as e:
-            print(f"Cache Reading Error: {e}")
+            print(f"Cache Reading Error: {e}, proceeding to re-analyze")
             # If cache is corrupt, proceed to re-analyze
 
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if not os.path.exists(filepath):
-        return jsonify({'error': 'الملف غير موجود'}), 404
-        
-    if filename.endswith('.csv'):
-        df = pd.read_csv(filepath)
-    else:
-        df = pd.read_excel(filepath)
-    
-    text_column = next((col for col in ['text', 'review', 'comment', 'نص', 'تقييم'] if col in df.columns), None)
-    if text_column is None:
-        return jsonify({'error': 'لم يتم العثور على عمود النص في الملف'}), 400
-    
-    texts = df[text_column].fillna("").astype(str).tolist()
-    
-    force_local = request.args.get('force_local') == 'true'
-    provider = 'local'
-    
-    # Analyze using Gemini or Local Model
-    if current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key and not force_local:
+    # ========================================================
+    # إذا لم يكن موجوداً (Cache Miss) -> نبدأ التحليل الفعلي
+    # ========================================================
+    results = []
+
+    # مسار 1: الموديل متعدد المهام الجديد
+    if selected_model == 'multitask':
         try:
-            analyzer = GeminiAnalyzer(current_user.gemini_api_key)
-            results = analyzer.analyze_batch(texts)
+            from utils.manager import model_manager
+            if not getattr(model_manager, 'multitask_analyzer', None):
+                if not model_manager.load_multitask():
+                    return jsonify({'error': 'ملفات الموديل الجديد (MultiTask) غير موجودة في الخادم. يرجى التأكد من رفع مجلد الموديل.'}), 500
+            
+            if getattr(model_manager, 'multitask_analyzer', None) and model_manager.multitask_analyzer.model is not None:
+                results = model_manager.analyze_batch_multitask(texts)
+                provider = 'local_multitask'
+            else:
+                return jsonify({'error': 'ملفات الموديل الجديد (MultiTask) غير موجودة أو تالفة.'}), 500
+        except Exception as e:
+            print(f"Multitask Analysis Error: {e}")
+            return jsonify({'error': f'حدث خطأ أثناء تحميل موديل MultiTask: {str(e)}'}), 500
+
+    # مسار 2: Gemini
+    elif selected_model == 'gemini' and current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key:
+        try:
+            temp_analyzer = GeminiAnalyzer(current_user.gemini_api_key)
+            results = temp_analyzer.analyze_batch(texts)
             provider = 'gemini'
         except Exception as e:
-            err_msg = str(e)
-            print(f"Gemini Error: {err_msg}")
-            # Identify if it's a provider error that needs interactive fallback
-            if any(k in err_msg.lower() for k in ["quota", "api_key", "limit"]):
-                return jsonify({
-                    'success': False, 
-                    'error_type': 'provider_error', 
-                    'message': f"فشل الاتصال بـ Gemini: {err_msg}",
-                    'details': err_msg
-                }), 400
-            
-            # Other errors fallback automatically
-            load_models()
-            results = model_manager.analyze_batch(texts)
-    else:
-        try:
-            load_models()
-            results = model_manager.analyze_batch(texts)
-        except Exception as e:
-            print(f"Local Analysis Crash: {e}")
-            return jsonify({'error': f'فشل التحليل المحلي: {str(e)}'}), 500
-    
-    # Ensure provider and logic_explanation are marked in each result
-    for r in results:
-        if 'provider' not in r:
-            r['provider'] = provider
-        if 'logic_explanation' not in r:
-            r['logic_explanation'] = 'تحليل محلي عبر موديل BERT' if provider == 'local' else ''
+            print(f"Gemini Analysis Error: {e}")
+            return jsonify({'error': f'فشل الاتصال بـ Gemini المحترف: {str(e)}'}), 500
 
+    # مسار 3: الموديل الكلاسيكي (الافتراضي و Fallback)
+    else:
+        from utils.manager import model_manager
+        if not (model_manager.preprocessor and model_manager.aspect_extractor and model_manager.sentiment_classifier):
+            if not model_manager.load_models():
+                return jsonify({'error': 'ملفات الموديلات المحلية الكلاسيكية غير موجودة في الخادم. يرجى التأكد من رفعها.'}), 500
+        
+        try:
+            results = model_manager.analyze_batch(texts)
+            provider = 'local'
+        except Exception as e:
+            print(f"Classic Model Error: {e}")
+            return jsonify({'error': f'حدث خطأ في الموديل الكلاسيكي: {str(e)}'}), 500
+        
+    # حفظ النتائج في CSV
     results_df = pd.DataFrame(results)
     results_df.to_csv(processed_path, index=False)
     
-    # Generate and save Executive Summary if Gemini is configured (even if analysis fell back to local)
+    # ملخص تنفيذي (Gemini فقط)
     if current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key:
         try:
             temp_analyzer = GeminiAnalyzer(current_user.gemini_api_key)
@@ -275,8 +331,37 @@ def analyze_file(filename):
                 json.dump({'executive_summary': summary_text}, f, ensure_ascii=False)
         except Exception as e:
             print(f"Executive Summary Generation failed: {e}")
+            
+    stats = _calculate_stats(results)
     
-    return jsonify({'success': True, 'results': results, 'stats': _calculate_stats(results)})
+    # === حفظ السجل في قاعدة البيانات (للمسجلين فقط) ===
+    if current_user.is_authenticated:
+        try:
+            # Check if this exact analysis already exists to avoid duplicates on refresh
+            existing_record = AnalysisHistory.query.filter_by(
+                user_id=current_user.id,
+                internal_filename=base_name
+            ).first()
+            
+            if not existing_record:
+                history_record = AnalysisHistory(
+                    user_id=current_user.id,
+                    original_filename=os.path.splitext(filename)[0],
+                    internal_filename=base_name,
+                    model_used=provider,
+                    total_reviews=stats['total_reviews'],
+                    positive_count=stats['sentiment_distribution']['إيجابي'],
+                    negative_count=stats['sentiment_distribution']['سلبي'],
+                    neutral_count=stats['sentiment_distribution']['محايد']
+                )
+                db.session.add(history_record)
+                db.session.commit()
+                print(f"Saved AnalysisHistory for {base_name}")
+        except Exception as e:
+            print(f"Error saving analysis history: {e}")
+            db.session.rollback()
+    
+    return jsonify({'success': True, 'results': results, 'stats': stats, 'base_name': base_name})
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -287,6 +372,39 @@ def settings():
         db.session.commit()
         flash('تمت تحديث الإعدادات بنجاح', 'success')
     return render_template('settings.html')
+
+@app.route('/history')
+@login_required
+def history():
+    analyses = AnalysisHistory.query.filter_by(user_id=current_user.id).order_by(AnalysisHistory.created_at.desc()).all()
+    return render_template('history.html', analyses=analyses)
+
+@app.route('/history/delete/<int:analysis_id>', methods=['POST'])
+@login_required
+def delete_history(analysis_id):
+    analysis = AnalysisHistory.query.get_or_404(analysis_id)
+    if analysis.user_id != current_user.id:
+        return jsonify({'success': False, 'error': 'غير مصرح'}), 403
+        
+    try:
+        # Delete associated files if they exist
+        processed_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.csv')
+        summary_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.json')
+        
+        if os.path.exists(processed_path):
+            os.remove(processed_path)
+        if os.path.exists(summary_path):
+            os.remove(summary_path)
+            
+        db.session.delete(analysis)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error deleting history: {e}")
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 
 @app.route('/admin', methods=['GET', 'POST'])
 @admin_required
@@ -308,18 +426,44 @@ def _calculate_stats(results):
         }
     }
 
-@app.route('/results/<filename>')
-def get_results(filename):
+@app.route('/results/<base_name>')
+def get_results(base_name):
     """جلب النتائج المحللة مسبقاً للداش بورد"""
-    return analyze_file(filename)
+    base_name = os.path.splitext(base_name)[0]
+    processed_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{base_name}.csv')
+    
+    if os.path.exists(processed_path):
+        try:
+            df_cached = pd.read_csv(processed_path)
+            results = []
+            for _, row in df_cached.iterrows():
+                try:
+                    aspects_raw = row.get('aspects', '[]')
+                    aspects = ast.literal_eval(aspects_raw) if isinstance(aspects_raw, str) else aspects_raw
+                except:
+                    aspects = []
+                
+                results.append({
+                    'original_text': row.get('original_text', ''),
+                    'cleaned_text': row.get('cleaned_text', ''),
+                    'aspects': aspects,
+                    'overall_sentiment': row.get('overall_sentiment', 'محايد'),
+                    'confidence': float(row.get('confidence', 0.9)),
+                    'logic_explanation': row.get('logic_explanation', ''),
+                    'provider': row.get('provider', 'cached')
+                })
+            stats = _calculate_stats(results)
+            return jsonify({'success': True, 'results': results, 'stats': stats})
+        except Exception as e:
+            return jsonify({'success': False, 'error': f"Error reading cached results: {e}"}), 500
+    
+    return jsonify({'success': False, 'error': 'Analysis results not found.'}), 404
 
 @app.route('/dashboard/<filename>')
-@login_required
 def dashboard(filename):
     return render_template('dashboard.html', filename=filename)
 
 @app.route('/summary/<filename>')
-@login_required
 def summary(filename):
     base_name = os.path.splitext(filename)[0]
     filepath = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{base_name}.csv')

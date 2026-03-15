@@ -22,3 +22,22 @@ class GlobalSetting(db.Model):
 
     def __repr__(self):
         return f"GlobalSetting('{self.key}', '{self.value}')"
+
+class AnalysisHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    original_filename = db.Column(db.String(255), nullable=False)
+    internal_filename = db.Column(db.String(255), unique=True, nullable=False)
+    model_used = db.Column(db.String(50), nullable=False)
+    total_reviews = db.Column(db.Integer, default=0)
+    positive_count = db.Column(db.Integer, default=0)
+    negative_count = db.Column(db.Integer, default=0)
+    neutral_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Relationship to user
+    user = db.relationship('User', backref=db.backref('analyses', lazy=True))
+
+    def __repr__(self):
+        return f"AnalysisHistory('{self.original_filename}', '{self.created_at}')"
+

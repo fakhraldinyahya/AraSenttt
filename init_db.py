@@ -1,7 +1,7 @@
 from flask import Flask
 from config import Config
 from extensions import db, bcrypt
-from db_models.user import User, GlobalSetting
+from db_models.user import User, GlobalSetting, AnalysisHistory
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -13,7 +13,7 @@ with app.app_context():
     
     # Create default settings
     if not GlobalSetting.query.filter_by(key='guest_analysis_limit').first():
-        limit = GlobalSetting(key='guest_analysis_limit', value='10')
+        limit = GlobalSetting(key='guest_analysis_limit', value='50')
         db.session.add(limit)
     
     # Create default admin if not exists

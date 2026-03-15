@@ -56,9 +56,23 @@
                         <button type="button" class="btn-close" onclick="resetFile()"></button>
                     </div>
 
+                    <div class="mb-4 mt-3 text-end" id="modelSelection" style="display: none;">
+                        <label class="form-label fw-bold text-saudi">اختر طريقة التحليل:</label>
+                        <select id="modelChoice" class="form-select form-select-lg" dir="rtl">
+                            <option value="local">١. موديلات BERT الكلاسيكية (المسار السابق - افتراضي)</option>
+                            <option value="multitask">٢. الموديل الجديد المدمج (Multi-Task - أسرع وأشمل)</option>
+                            {% if current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key %}
+                            <option value="gemini">٣. الذكاء الاصطناعي (Gemini AI)</option>
+                            {% endif %}
+                        </select>
+                        <div class="form-text mt-2 text-muted text-end">
+                            <i class="fas fa-info-circle"></i> الموديل المدمج يحلل 7 فئات بمرور واحد بدقة أعلى.
+                        </div>
+                    </div>
+
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-saudi btn-lg w-100 py-3 fw-bold" id="uploadBtn">
-                            <i class="fas fa-magic me-2"></i> معالجة النتائج باستخدام BERT
+                            <i class="fas fa-magic me-2"></i> بدء عملية التحليل
                         </button>
                     </div>
                 </form>
@@ -101,6 +115,7 @@
             document.getElementById('fileNameDisplay').textContent = file.name;
             document.getElementById('fileSizeDisplay').textContent = (file.size / 1024).toFixed(1) + ' KB';
             document.getElementById('filePreview').setAttribute('style', 'display: flex !important');
+            document.getElementById('modelSelection').style.display = 'block';
             document.querySelector('.upload-zone').style.display = 'none';
         }
     });
@@ -108,6 +123,7 @@
     function resetFile() {
         fileInput.value = '';
         document.getElementById('filePreview').setAttribute('style', 'display: none !important');
+        document.getElementById('modelSelection').style.display = 'none';
         document.querySelector('.upload-zone').style.display = 'block';
     }
 
@@ -115,6 +131,9 @@
         e.preventDefault();
         const file = fileInput.files[0];
         if (!file) { alert('برجاء اختيار ملف'); return; }
+        
+        // جلب اختيار الموديل من القائمة
+        const selectedModel = document.getElementById('modelChoice') ? document.getElementById('modelChoice').value : 'local';
 
         const formData = new FormData();
         formData.append('file', file);
@@ -127,23 +146,36 @@
             const uploadRes = await fetch('/upload', { method: 'POST', body: formData });
             const uploadData = await uploadRes.json();
             if (!uploadData.success) throw new Error(uploadData.error);
+            
+            if (uploadData.sliced) {
+                // عرض تنبيه لطيف للمستخدم أن الملف تم اقتطاعه
+                await Swal.fire({
+                    title: 'عينة تجريبية 🎁',
+                    text: uploadData.slice_message,
+                    icon: 'info',
+                    confirmButtonText: 'حسناً، أرني النتيجة',
+                    confirmButtonColor: '#28a745'
+                });
+            }
 
-            updateProgress(65, 'خوارزميات BERT تحلل البيانات...');
-            const analyzeRes = await fetch(`/analyze/${uploadData.filename}`, { method: 'POST' });
+            updateProgress(65, 'جاري تحليل البيانات باستخدام الذكاء الاصطناعي...');
+            // تمرير الموديل المختار كـ query parameter
+            const analyzeRes = await fetch(`/analyze/${uploadData.filename}?model=${selectedModel}`, { method: 'POST' });
             const analyzeData = await analyzeRes.json();
 
             if (!analyzeData.success) {
                 if (analyzeData.error_type === 'provider_error') {
                     // Redirect to dashboard anyway, it will show the fallback modal there
                     updateProgress(100, 'تنبيه في مزود التحليل، يتم الانتقال...');
-                    setTimeout(() => window.location.href = `/dashboard/${uploadData.filename}`, 1000);
+                    setTimeout(() => window.location.href = `/dashboard/${analyzeData.base_name}`, 1000);
                     return;
                 }
                 throw new Error(analyzeData.message || analyzeData.error);
             }
 
             updateProgress(100, 'اكتمل التحليل!');
-            setTimeout(() => window.location.href = `/dashboard/${uploadData.filename}`, 800);
+            // التعديل هنا: يجب التوجيه لـ base_name (الهاش) وليس لاسم الملف الأصلي
+            setTimeout(() => window.location.href = `/dashboard/${analyzeData.base_name}`, 800);
 
         } catch (err) {
             document.getElementById('errorText').textContent = err.message;
