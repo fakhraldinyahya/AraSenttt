@@ -3,16 +3,20 @@
 {% block title %}AraSent - لوحة التحكم التفاعلية{% endblock %}
 
 {% block extra_css %}
-<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+    .navbar-dash{
+        background: linear-gradient(var(--bg-gradient-end) 20%,var(--bg-gradient-mid) 100%,var(--bg-gradient-start) 80%) !important
+    }
+</style>
+<script src="{{ url_for('static', filename='vendor/plotly/plotly-2.32.0.min.js') }}"></script>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4 py-5">
+<div class="container-fluid px-4 mt-5 py-5">
     <div class="d-flex flex-wrap justify-content-between align-items-end mb-5 gap-3 fade-in">
         <div>
-            <h1 class="fw-bold text-primary display-5 mb-0">مركز التحليلات الاستراتيجية</h1>
-            <p class="text-muted"><i class="fas fa-file-alt me-2"></i> تقرير الملف: <span class="fw-bold text-dark">{{
-                    filename }}</span></p>
+            <h1 class="fw-bold text-saudi text-center display-5 mb-0">مركز التحليلات الاستراتيجية</h1>
+            
         </div>
         <div class="d-flex gap-2">
             <a href="/summary/{{ filename }}" class="btn btn-outline-saudi fw-bold"><i
@@ -25,39 +29,63 @@
     <!-- Quick Stats -->
     <div class="row g-4 mb-5 fade-in" style="animation-delay: 0.1s;">
         <div class="col-md-3">
-            <div class="stats-card bg-primary-gradient shadow">
-                <div>
-                    <small class="opacity-75">إجمالي التقييمات</small>
-                    <h2 class="fw-bold mb-0" id="totalReviews">0</h2>
+            <div class="stats-card shadow-sm">
+                <div class="stats-card__content">
+                    <small class="stats-card__label">إجمالي التقييمات</small>
+                    <h2 class="stats-card__value" id="totalReviews">0</h2>
+                    <div class="stats-card__trend stats-card__trend--positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span id="totalReviewsMeta">0%</span>
+                    </div>
                 </div>
-                <i class="fas fa-comments"></i>
+                <div class="stats-card__icon stats-card__icon--teal">
+                    <i class="fas fa-comments"></i>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card bg-success-gradient shadow">
-                <div>
-                    <small class="opacity-75">إيجابي</small>
-                    <h2 class="fw-bold mb-0" id="positiveCount">0</h2>
+            <div class="stats-card shadow-sm">
+                <div class="stats-card__content">
+                    <small class="stats-card__label">التقييمات الإيجابية</small>
+                    <h2 class="stats-card__value" id="positiveCount">0</h2>
+                    <div class="stats-card__trend stats-card__trend--positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span id="positiveMeta">0%</span>
+                    </div>
                 </div>
-                <i class="fas fa-smile"></i>
+                <div class="stats-card__icon stats-card__icon--green">
+                    <i class="fas fa-thumbs-up"></i>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card bg-danger-gradient shadow">
-                <div>
-                    <small class="opacity-75">سلبي</small>
-                    <h2 class="fw-bold mb-0" id="negativeCount">0</h2>
+            <div class="stats-card shadow-sm">
+                <div class="stats-card__content">
+                    <small class="stats-card__label">التقييمات السلبية</small>
+                    <h2 class="stats-card__value" id="negativeCount">0</h2>
+                    <div class="stats-card__trend stats-card__trend--negative">
+                        <i class="fas fa-arrow-down"></i>
+                        <span id="negativeMeta">0%</span>
+                    </div>
                 </div>
-                <i class="fas fa-frown"></i>
+                <div class="stats-card__icon stats-card__icon--red">
+                    <i class="fas fa-thumbs-down"></i>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card bg-warning-gradient shadow">
-                <div>
-                    <small class="opacity-75">محايد</small>
-                    <h2 class="fw-bold mb-0" id="neutralCount">0</h2>
+            <div class="stats-card shadow-sm">
+                <div class="stats-card__content">
+                    <small class="stats-card__label">التقييمات المحايدة</small>
+                    <h2 class="stats-card__value" id="neutralCount">0</h2>
+                    <div class="stats-card__trend stats-card__trend--neutral">
+                        <i class="fas fa-minus"></i>
+                        <span id="neutralMeta">0%</span>
+                    </div>
                 </div>
-                <i class="fas fa-meh"></i>
+                <div class="stats-card__icon stats-card__icon--gold">
+                    <i class="fas fa-face-meh"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -84,6 +112,20 @@
         <div class="col-lg-6">
             <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-pie me-2 text-saudi"></i> التقييمات حسب الفئة</span>
+                    <span class="small text-muted">توزيع الجوانب الأكثر حضورًا</span>
+                </div>
+                <div class="card-body">
+                    <div id="aspectCategoryPieChart" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5 fade-in" style="animation-delay: 0.23s;">
+        <div class="col-lg-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-chart-bar me-2 text-saudi"></i> تحليل الجوانب (ABSA)</span>
                     <div class="btn-group btn-group-sm">
                         <button class="btn btn-outline-saudi active" onclick="changeAspectChart('bar', this)"
@@ -94,6 +136,10 @@
                                 class="fas fa-chart-line"></i></button>
                         <button class="btn btn-outline-saudi" onclick="changeAspectChart('area', this)" title="مساحة"><i
                                 class="fas fa-chart-area"></i></button>
+                        <button class="btn btn-outline-saudi" onclick="changeAspectChart('radar', this)" title="رادار"><i
+                                class="fas fa-bullseye"></i></button>
+                        <button class="btn btn-outline-saudi" onclick="changeAspectChart('scatter', this)" title="نقاط"><i
+                                class="fas fa-braille"></i></button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -101,29 +147,29 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Pivot Table Section -->
-    <div class="card shadow-sm mb-5 fade-in" style="animation-delay: 0.25s;">
-        <div class="card-header bg-white">
-            <i class="fas fa-table me-2 text-primary"></i> مصفوفة التحليل المتقاطع (Cross-Analysis Matrix)
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-bordered mb-0 text-center align-middle">
-                    <thead class="bg-light">
-                        <tr id="pivotHeader">
-                            <th>الجانب / الحالة</th>
-                            <th class="text-success">إيجابي</th>
-                            <th class="text-danger">سلبي</th>
-                            <th class="text-warning">محايد</th>
-                            <th class="bg-light fw-bold">الإجمالي</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pivotBody">
-                        <!-- Populated via JS -->
-                    </tbody>
-                </table>
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <i class="fas fa-table me-2 text-primary"></i> ملخص الجوانب حسب المشاعر
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0 text-center align-middle">
+                            <thead class="bg-light">
+                                <tr id="pivotHeader">
+                                    <th>الجانب / الحالة</th>
+                                    <th class="text-success">إيجابي</th>
+                                    <th class="text-danger">سلبي</th>
+                                    <th class="text-warning">محايد</th>
+                                    <th class="bg-light fw-bold">الإجمالي</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pivotBody">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -214,7 +260,7 @@
                 </div>
                 <h5 class="fw-bold mb-3">فشل الاتصال بـ Gemini</h5>
                 <p class="text-muted" id="fallbackErrorMessage"></p>
-                <p class="fw-bold text-primary">هل تود المتابعة باستخدام الموديلات المحلية (BERT) كبديل؟</p>
+                <p class="fw-bold text-primary">هل تود المتابعة باستخدام موديل AraSent المحلي كبديل؟</p>
             </div>
             <div class="modal-footer border-0 p-4 pt-0">
                 <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">إلغاء</button>
@@ -252,6 +298,15 @@
             document.getElementById('positiveCount').textContent = stats.sentiment_distribution['إيجابي'] || 0;
             document.getElementById('negativeCount').textContent = stats.sentiment_distribution['سلبي'] || 0;
             document.getElementById('neutralCount').textContent = stats.sentiment_distribution['محايد'] || 0;
+            const total = stats.total_reviews || 0;
+            const positive = stats.sentiment_distribution['إيجابي'] || 0;
+            const negative = stats.sentiment_distribution['سلبي'] || 0;
+            const neutral = stats.sentiment_distribution['محايد'] || 0;
+
+            document.getElementById('totalReviewsMeta').textContent = total > 0 ? '100% من الملف' : 'لا توجد بيانات';
+            document.getElementById('positiveMeta').textContent = total > 0 ? `${((positive / total) * 100).toFixed(1)}% من الإجمالي` : '0% من الإجمالي';
+            document.getElementById('negativeMeta').textContent = total > 0 ? `${((negative / total) * 100).toFixed(1)}% من الإجمالي` : '0% من الإجمالي';
+            document.getElementById('neutralMeta').textContent = total > 0 ? `${((neutral / total) * 100).toFixed(1)}% من الإجمالي` : '0% من الإجمالي';
 
             updateCharts();
             drawPivotTable(results);
@@ -357,6 +412,7 @@
         if (!currentData) return;
         drawSentimentChart(currentData, sentimentChartType);
         drawAspectChart(currentData, aspectChartType);
+        drawAspectCategoryPieChart(currentData);
     }
 
     function drawSentimentChart(results, type) {
@@ -413,15 +469,49 @@
         const sentiments = ['إيجابي', 'سلبي', 'محايد'];
         const colors = ['#006C35', '#dc3545', '#D4AF37'];
 
+        if (type === 'radar') {
+            const radarData = sentiments.map((s, i) => ({
+                type: 'scatterpolar',
+                r: [...x.map(a => stats[a][s]), x.length ? stats[x[0]][s] : 0],
+                theta: [...x, x[0]],
+                fill: 'toself',
+                name: s,
+                line: { color: colors[i], width: 2 },
+                fillcolor: i === 0 ? 'rgba(0,108,53,0.16)' : i === 1 ? 'rgba(220,53,69,0.14)' : 'rgba(212,175,55,0.16)'
+            }));
+
+            const radarLayout = {
+                margin: { t: 20, b: 20, l: 20, r: 20 },
+                font: { family: 'Tajawal' },
+                polar: {
+                    radialaxis: {
+                        visible: true,
+                        gridcolor: 'rgba(58,138,126,0.12)'
+                    },
+                    angularaxis: {
+                        gridcolor: 'rgba(58,138,126,0.08)'
+                    }
+                },
+                legend: { orientation: 'h', y: -0.15 }
+            };
+
+            Plotly.newPlot('aspectChart', radarData, radarLayout, { responsive: true });
+            return;
+        }
+
         const data = sentiments.map((s, i) => ({
             name: s,
-            type: (type === 'horizontalBar') ? 'bar' : (type === 'area' ? 'scatter' : (type === 'line' ? 'scatter' : 'bar')),
+            type: (type === 'horizontalBar') ? 'bar' : (type === 'area' || type === 'line' || type === 'scatter' ? 'scatter' : 'bar'),
             x: (type === 'horizontalBar') ? x.map(a => stats[a][s]) : x,
             y: (type === 'horizontalBar') ? x : x.map(a => stats[a][s]),
             orientation: (type === 'horizontalBar') ? 'h' : 'v',
-            mode: (type === 'area' || type === 'line') ? 'lines+markers' : undefined,
+            mode: type === 'scatter' ? 'markers' : ((type === 'area' || type === 'line') ? 'lines+markers' : undefined),
             fill: (type === 'area') ? 'tozeroy' : undefined,
-            marker: { color: colors[i] },
+            marker: {
+                color: colors[i],
+                size: type === 'scatter' ? 12 : undefined
+            },
+            line: (type === 'scatter') ? undefined : { color: colors[i], width: 3 },
             stackgroup: (type === 'area') ? 'one' : undefined
         }));
 
@@ -434,6 +524,69 @@
         };
 
         Plotly.newPlot('aspectChart', data, layout, { responsive: true });
+    }
+
+    function drawAspectCategoryPieChart(reviews) {
+        const aspectsList = ['الطعام', 'الخدمة', 'السعر', 'الأجواء', 'النظافة', 'الموقع', 'التوصيل'];
+        const aspectCounts = {};
+        aspectsList.forEach(a => aspectCounts[a] = 0);
+
+        reviews.forEach(review => {
+            review.aspects.forEach(ai => {
+                if (aspectCounts[ai.aspect] !== undefined) {
+                    aspectCounts[ai.aspect]++;
+                }
+            });
+        });
+
+        const filteredEntries = Object.entries(aspectCounts).filter(([, count]) => count > 0);
+        const labels = filteredEntries.map(([label]) => label);
+        const values = filteredEntries.map(([, value]) => value);
+        const colors = ['#0B6E4F', '#D1495B', '#EDAE49', '#00798C', '#9C6644', '#6A4C93', '#F77F00'];
+
+        const data = [{
+            values,
+            labels,
+            type: 'pie',
+            hole: 0.45,
+            sort: false,
+            direction: 'clockwise',
+            textinfo: 'percent',
+            textposition: 'inside',
+            marker: {
+                colors,
+                line: {
+                    color: '#ffffff',
+                    width: 3
+                }
+            },
+            hovertemplate: '%{label}<br>عدد التقييمات: %{value}<br>النسبة: %{percent}<extra></extra>'
+        }];
+
+        const layout = {
+            margin: { t: 10, b: 10, l: 10, r: 10 },
+            showlegend: true,
+            legend: {
+                orientation: 'v',
+                x: 1,
+                xanchor: 'left',
+                y: 0.5,
+                font: { family: 'Tajawal', size: 13 }
+            },
+            font: { family: 'Tajawal' },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            annotations: labels.length ? [{
+                text: 'الفئات',
+                showarrow: false,
+                font: { family: 'Tajawal', size: 16, color: '#6b847f' }
+            }] : []
+        };
+
+        Plotly.newPlot('aspectCategoryPieChart', data, layout, {
+            responsive: true,
+            displayModeBar: false
+        });
     }
 
     function drawPivotTable(results) {
@@ -489,11 +642,11 @@
         modal.hide();
 
         document.getElementById('reviewsTableBody').innerHTML = `<tr><td colspan="4" class="text-center py-5">
-            <div class="spinner-border text-primary me-2"></div> جاري التبديل للموديلات المحلية...
+            <div class="spinner-border text-primary me-2"></div> جاري التبديل إلى موديل AraSent المحلي...
         </td></tr>`;
 
         try {
-            const response = await fetch(`/analyze/{{ filename }}?force_local=true`, { method: 'POST' });
+            const response = await fetch(`/analyze/{{ filename }}?force_arasant=true&model=arasant`, { method: 'POST' });
             const data = await response.json();
             if (data.success) {
                 location.reload();

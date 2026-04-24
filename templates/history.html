@@ -50,8 +50,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-5 mt-4">
-    <div class="row mb-5 fade-in">
+<section class="admin-section py-5" style="background: linear-gradient(var(--bg-gradient-end) 0%,var(--bg-gradient-mid) 50%,var(--bg-gradient-start) 100%) !important">
+
+<div class="container py-5 mt-5" >
+    <div class="row mb-4 fade-in">
         <div class="col-12 text-center">
             <h1 class="fw-bold text-saudi display-5">سجل التحليلات السابقة</h1>
             <p class="text-muted fs-5">استعرض تقارير التقييمات التي قمت بتحليلها مسبقاً في أي وقت</p>
@@ -86,10 +88,10 @@
                             <td>
                                 {% if analysis.model_used == 'gemini' %}
                                     <span class="model-badge"><i class="fas fa-robot"></i> Gemini AI</span>
-                                {% elif analysis.model_used == 'local_multitask' %}
-                                    <span class="model-badge"><i class="fas fa-bolt"></i> مدمج (MultiTask)</span>
+                                {% elif analysis.model_used == 'arasant_local' %}
+                                    <span class="model-badge"><i class="fas fa-bolt"></i> AraSent المحلي</span>
                                 {% else %}
-                                    <span class="model-badge"><i class="fas fa-cogs"></i> كلاسيكي (BERT)</span>
+                                    <span class="model-badge"><i class="fas fa-microchip"></i> غير محدد</span>
                                 {% endif %}
                             </td>
                             <td><span class="badge bg-secondary rounded-pill fs-6">{{ analysis.total_reviews }}</span></td>
@@ -127,10 +129,10 @@
         </div>
     </div>
 </div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function deleteAnalysis(id) {
         Swal.fire({

@@ -1,7 +1,7 @@
 """
-utils/multitask_analyzer.py
+utils/arasent_analyzer.py
 ============================
-محلل AraSent متعدد المهام (Multi-Task)
+محلل AraSent المحلي
 يعتمد على النموذج المدرب: arasant_multitask_model_last_v2
 التدريب مبني على AraBERT v2 مع مهمتين:
   1. كشف وجود الفئة (Aspect Existence) - 7 فئات
@@ -51,7 +51,7 @@ DEFAULT_THRESHOLD = 0.45
 # ============================================================
 # بنية النموذج (نفس كود التدريب)
 # ============================================================
-class AraSentMultiTaskModel(nn.Module):
+class AraSentModel(nn.Module):
     """
     نموذج متعدد المهام:
       - المهمة 1: كشف وجود الفئة (7 binary outputs)
@@ -96,7 +96,7 @@ def _clean_text(text: str) -> str:
 # ============================================================
 # الكلاس الرئيسي
 # ============================================================
-class MultiTaskAnalyzer:
+class AraSentAnalyzer:
     """
     واجهة التحليل متعددة المهام.
     يحمل الموديل مرة واحدة ويحتفظ به في الذاكرة (singleton-friendly).
@@ -114,7 +114,7 @@ class MultiTaskAnalyzer:
         if self.model is not None:
             return True
         try:
-            print(f"[MultiTask] Loading model from {self.model_dir} ...")
+            print(f"[AraSent] Loading model from {self.model_dir} ...")
 
             # قراءة model_info.json لمعرفة اسم base model
             info_path = os.path.join(self.model_dir, 'model_info.json')
@@ -131,7 +131,7 @@ class MultiTaskAnalyzer:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
 
             # بناء بنية النموذج
-            self.model = AraSentMultiTaskModel(self.config) # Changed to pass self.config
+            self.model = AraSentModel(self.config) # Changed to pass self.config
 
             # تحميل الأوزان
             weights_path = os.path.join(self.model_dir, 'model_weights.pth')
@@ -140,10 +140,10 @@ class MultiTaskAnalyzer:
             self.model.to(self.device)
             self.model.eval()
 
-            print(f"[MultiTask] Model loaded successfully on {self.device} ")
+            print(f"[AraSent] Model loaded successfully on {self.device} ")
             return True
         except Exception as e:
-            print(f"[MultiTask] Error loading model: {e}")
+            print(f"[AraSent] Error loading model: {e}")
             self.model = None
             self.tokenizer = None
             return False
@@ -211,7 +211,7 @@ class MultiTaskAnalyzer:
         """
         if self.model is None:
             if not self.load():
-                raise RuntimeError("لم يتم تحميل موديل MultiTask. تأكد من وجود ملفات الموديل.")
+                raise RuntimeError("لم يتم تحميل موديل AraSent. تأكد من وجود ملفات الموديل.")
 
         results = []
         for text in texts:
@@ -224,18 +224,23 @@ class MultiTaskAnalyzer:
                     'aspects':           raw['aspects'],
                     'overall_sentiment': overall_sent,
                     'confidence':        conf,
-                    'provider':          'local_multitask',
-                    'logic_explanation': 'تحليل متعدد المهام عبر AraBERT - 7 فئات',
+                    'provider':          'arasant_local',
+                    'logic_explanation': 'تحليل AraSent المحلي - 7 فئات',
                 })
             except Exception as e:
-                print(f"[MultiTask] Error analyzing text: {e}")
+                print(f"[AraSent] Error analyzing text: {e}")
                 results.append({
                     'original_text':     text,
                     'cleaned_text':      _clean_text(str(text)),
                     'aspects':           [],
                     'overall_sentiment': 'محايد',
                     'confidence':        0.0,
-                    'provider':          'local_multitask',
+                    'provider':          'arasant_local',
                     'logic_explanation': f'خطأ في التحليل: {str(e)}',
                 })
         return results
+
+
+# Backward-compatible aliases
+AraSentMultiTaskModel = AraSentModel
+MultiTaskAnalyzer = AraSentAnalyzer

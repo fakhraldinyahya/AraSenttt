@@ -1,34 +1,123 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}AraSent - المنصة الرائدة في تحليل تجربة العميل لقطاع المطاعم{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section text-center text-lg-start">
+<section class="hero-section">
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6 fade-in">
-                <span class="badge rounded-pill bg-white bg-opacity-20 px-3 py-2 mb-4">
-                    <i class="fas fa-sparkles text-warning me-2"></i> مدعوم بتقنيات AraBERT المتطورة
-                </span>
-                <h1 class="display-3 fw-800 mb-4">حوّل تجربة عملائك إلى <span class="text-warning">ميزة تنافسية</span> مُستدامة</h1>
-                <p class="lead mb-5 opacity-90 fs-4">المنصة السعودية الرائدة التي تمنح أصحاب المطاعم القدرة على قراءة ما وراء الكلمات، وفهم أدق تفاصيل الجودة والخدمة عبر تقنيات تحليل المشاعر المتقدمة.</p>
-                <div class="d-flex gap-3 justify-content-center justify-content-lg-start">
-                    <a href="/upload" class="btn btn-gold btn-lg px-5 py-3 fw-bold shadow-lg">
+
+                <h1 class="display-3 fw-800 mb-4"
+                    style="color: var(--text-dark);line-height:1.2;">
+                    حوّل النصوص الى رؤى استراتيجية
+                </h1>
+                <p class="lead">
+                    المنصة السعودية الرائدة التي تمنح أصحاب المطاعم القدرة على قراءة ما وراء الكلمات،
+                    وفهم أدق تفاصيل الجودة والخدمة عبر تقنيات تحليل المشاعر المتقدمة.
+                </p>
+                <div class="d-flex gap-3 flex-wrap justify-content-start mb-4">
+                    <a href="/upload" class="btn btn-gold btn-lg px-5 py-3 fw-bold shadow-sm rounded-pill">
                         <i class="fas fa-rocket me-2"></i> ابدأ التحليل الآن
                     </a>
-                    <a href="#how-it-works" class="btn btn-outline-light btn-lg px-5 py-3">
+                    <a href="#how-it-works" class="btn btn-white btn-lg px-5 py-3 fw-bold rounded-pill">
                         <i class="fas fa-play-circle me-2"></i> كيف يعمل؟
                     </a>
                 </div>
+                <!-- Trust badges -->
+                <div class="d-flex gap-3 flex-wrap justify-content-start">
+                    <span class="d-flex align-items-center gap-1 small" style="color: var(--text-muted);">
+                        <i class="fas fa-check-circle" style="color: var(--primary-teal);"></i> دون بطاقة ائتمان
+                    </span>
+                    <span class="d-flex align-items-center gap-1 small" style="color: var(--text-muted);">
+                        <i class="fas fa-check-circle" style="color: var(--primary-teal);"></i> نتائج فورية
+                    </span>
+                    <span class="d-flex align-items-center gap-1 small" style="color: var(--text-muted);">
+                        <i class="fas fa-check-circle" style="color: var(--primary-teal);"></i> آمن وموثوق
+                    </span>
+                </div>
             </div>
+            <!-- Interactive Dashboard Mockup -->
             <div class="col-lg-6 fade-in" style="animation-delay: 0.2s;">
-                <div class="card p-2 bg-white bg-opacity-10 border-0 shadow-lg position-relative overflow-hidden">
-                    <img src="https://via.placeholder.com/650x450/ffffff/007bff?text=AraSent+AI+Analysis+Preview"
-                        alt="Dashboard Preview" class="img-fluid rounded-3">
-                    <div
-                        class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-center text-white small">
-                        مثال لتحليل المشاعر والجوانب (ABSA)
+                <div class="hero-dashboard-card">
+                    <!-- Dashboard Header -->
+                    <div class="db-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-chart-mixed" style="color:var(--primary-teal);"></i>
+                            <span class="fw-bold" style="font-size:0.95rem;">تحليل التقييمات</span>
+                        </div>
+                        <span class="db-live-badge"><span class="db-live-dot"></span> مباشر</span>
+                    </div>
+
+                    <!-- Sentiment Stats -->
+                    <div class="db-stats-row">
+                        <div class="db-stat-card positive">
+                            <div class="db-stat-icon">😊</div>
+                            <div>
+                                <div class="db-stat-label">المشاعر الإيجابية</div>
+                                <div class="db-stat-value" id="posCount">0%</div>
+                                <div class="db-progress-bar">
+                                    <div class="db-progress-fill positive-fill" style="width:0%" data-target="78"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="db-stat-card negative">
+                            <div class="db-stat-icon">😠</div>
+                            <div>
+                                <div class="db-stat-label">المشاعر السلبية</div>
+                                <div class="db-stat-value" id="negCount">0%</div>
+                                <div class="db-progress-bar">
+                                    <div class="db-progress-fill negative-fill" style="width:0%" data-target="15"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="db-stat-card neutral">
+                            <div class="db-stat-icon">😐</div>
+                            <div>
+                                <div class="db-stat-label">المحايدة</div>
+                                <div class="db-stat-value" id="neuCount">0%</div>
+                                <div class="db-progress-bar">
+                                    <div class="db-progress-fill neutral-fill" style="width:0%" data-target="7"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trend Chart + Topics -->
+                    <div class="db-bottom-row">
+                        <div class="db-chart-wrap">
+                            <div class="db-section-title">اتجاهات التقييمات</div>
+                            <div id="heroTrendChart" style="height:130px;"></div>
+                        </div>
+                        <div class="db-topics-wrap">
+                            <div class="db-section-title">أبرز المواضيع</div>
+                            <div class="db-topic-item">
+                                <span class="db-topic-dot" style="background:#3a8a7e;"></span>
+                                <span>جودة الطعام</span>
+                                <span class="db-topic-score positive-text">+85%</span>
+                            </div>
+                            <div class="db-topic-item">
+                                <span class="db-topic-dot" style="background:#6aada4;"></span>
+                                <span>خدمة العملاء</span>
+                                <span class="db-topic-score positive-text">+70%</span>
+                            </div>
+                            <div class="db-topic-item">
+                                <span class="db-topic-dot" style="background:#D4AF37;"></span>
+                                <span>الأسعار</span>
+                                <span class="db-topic-score neutral-text">~55%</span>
+                            </div>
+                            <div class="db-topic-item">
+                                <span class="db-topic-dot" style="background:#e05c5c;"></span>
+                                <span>النظافة</span>
+                                <span class="db-topic-score negative-text">-20%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer note -->
+                    <div class="db-footer-note">
+                        <i class="fas fa-bolt me-1"></i> تم تحليل 1,247 تقييم في 3.2 ثانية
                     </div>
                 </div>
             </div>
@@ -41,20 +130,20 @@
     <div class="container">
         <div class="row g-4 text-center">
             <div class="col-md-3">
-                <h2 class="fw-800 text-saudi mb-0">+50,000</h2>
-                <p class="text-muted">نص تم تحليله بدقة</p>
+                <h2 class="fw-800 mb-0" style="color: var(--primary-teal); font-size: 2.4rem;">+50,000</h2>
+                <p class="text-muted mt-1">نص تم تحليله بدقة</p>
             </div>
             <div class="col-md-3">
-                <h2 class="fw-800 text-saudi mb-0">95%</h2>
-                <p class="text-muted">دقة خوارزميات AraBERT</p>
+                <h2 class="fw-800 mb-0" style="color: var(--primary-teal); font-size: 2.4rem;">95%</h2>
+                <p class="text-muted mt-1">دقة خوارزميات AraBERT</p>
             </div>
             <div class="col-md-3">
-                <h2 class="fw-800 text-saudi mb-0">1.2 ثانية</h2>
-                <p class="text-muted">سرعة الاستجابة والتحليل</p>
+                <h2 class="fw-800 mb-0" style="color: var(--primary-teal); font-size: 2.4rem;">1.2 ث</h2>
+                <p class="text-muted mt-1">سرعة الاستجابة والتحليل</p>
             </div>
             <div class="col-md-3">
-                <h2 class="fw-800 text-saudi mb-0">+500</h2>
-                <p class="text-muted">شريك نجاح في قطاع المطاعم والضيافة</p>
+                <h2 class="fw-800 mb-0" style="color: var(--primary-teal); font-size: 2.4rem;">+500</h2>
+                <p class="text-muted mt-1">شريك نجاح في قطاع المطاعم والضيافة</p>
             </div>
         </div>
     </div>
@@ -65,210 +154,196 @@
     <div class="container py-5">
         <div class="text-center mb-5 fade-in">
             <h2 class="display-5 fw-bold text-saudi">رحلتك نحو التميز التشغيلي في 3 خطوات</h2>
-            <p class="text-muted fs-5">سخّرنا أعقد تقنيات الذكاء الاصطناعي لتكون بين يديك بكل بساطة</p>
+            <p class="fs-5" style="color: var(--text-muted);">سخرنا أدوات التحليل لتكون واضحة وسهلة من لحظة رفع الملف حتى قراءة النتائج</p>
         </div>
         <div class="row g-5">
             <div class="col-md-4 text-center fade-in" style="animation-delay: 0.1s;">
-                <div class="mb-4 d-inline-block bg-primary bg-opacity-10 p-4 rounded-circle">
+                <div class="mb-4 d-inline-block p-4 rounded-circle"
+                    style="background: linear-gradient(135deg, rgba(58,138,126,0.12), rgba(171,207,200,0.2));">
                     <i class="fas fa-file-excel fa-3x text-saudi"></i>
                 </div>
-                <h4 class="fw-bold mb-3">1. جمع البيانات</h4>
-                <p class="text-muted">نربط مطعمك بخدمة Google Reviews لسحب التعليقات تلقائياً أو عبر رفع ملفاتك الخاصة.</p>
+                <h4 class="fw-bold mb-3">1. رفع البيانات</h4>
+                <p style="color: var(--text-muted);">ارفع ملف التقييمات بصيغ CSV أو Excel ليتم تجهيز النصوص وتحليلها مباشرة داخل المنصة.</p>
             </div>
             <div class="col-md-4 text-center fade-in" style="animation-delay: 0.2s;">
-                <div class="mb-4 d-inline-block bg-success bg-opacity-10 p-4 rounded-circle">
-                    <i class="fas fa-brain fa-3x text-success"></i>
+                <div class="mb-4 d-inline-block p-4 rounded-circle"
+                    style="background: linear-gradient(135deg, rgba(58,138,126,0.12), rgba(171,207,200,0.2));">
+                    <i class="fas fa-brain fa-3x text-saudi"></i>
                 </div>
-                <h4 class="fw-bold mb-3">2. ذكاء المعالجة</h4>
-                <p class="text-muted">تقوم خوارزمياتنا المتقدمة بتنظيف النصوص وتحليل المشاعر دفعة واحدة.</p>
+                <h4 class="fw-bold mb-3">2. تشغيل التحليل</h4>
+                <p style="color: var(--text-muted);">اختر محرك التحليل المناسب، ثم تدقق المنصة في المشاعر والجوانب مثل الطعام والخدمة والسعر والنظافة.</p>
             </div>
             <div class="col-md-4 text-center fade-in" style="animation-delay: 0.3s;">
-                <div class="mb-4 d-inline-block bg-warning bg-opacity-10 p-4 rounded-circle">
-                    <i class="fas fa-chart-pie fa-3x text-warning"></i>
+                <div class="mb-4 d-inline-block p-4 rounded-circle"
+                    style="background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.2));">
+                    <i class="fas fa-chart-pie fa-3x" style="color: var(--gold-accent);"></i>
                 </div>
-                <h4 class="fw-bold mb-3">3. شاهد النتائج</h4>
-                <p class="text-muted">احصل على لوحة تحكم تفاعلية وملخص تنفيذي لاتخاذ القرارات.</p>
+                <h4 class="fw-bold mb-3">3. استعرض النتائج</h4>
+                <p style="color: var(--text-muted);">احصل على لوحة تحكم تفاعلية وملخص تنفيذي يساعدك على فهم الملاحظات واتخاذ القرار بسرعة.</p>
             </div>
         </div>
     </div>
-<!-- Our Services -->
-<section class="py-5 bg-white">
-    <div class="container py-5">
-        <div class="text-center mb-5 fade-in">
-            <h2 class="display-5 fw-bold text-saudi">حلولنا التخصصية لقطاع الأعمال</h2>
-            <p class="text-muted fs-5">نقدم أدوات تحليلية متكاملة مصممة خصيصاً للتوسع والنمو</p>
-        </div>
-        <div class="row g-4">
-            <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.1s;">
-                <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
-                    <div class="mb-4 d-inline-block bg-primary bg-opacity-10 p-4 rounded-circle">
-                        <i class="fas fa-layer-group fa-2x text-saudi"></i>
-                    </div>
-                    <h5 class="fw-bold">تحليل الجوانب (ABSA)</h5>
-                    <p class="small text-muted">تحديد دقيق للمشاعر تجاه كل ميزة أو خدمة على حدة في النص الواحد.</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.2s;">
-                <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
-                    <div class="mb-4 d-inline-block bg-primary bg-opacity-10 p-4 rounded-circle">
-                        <i class="fas fa-brain fa-2x text-saudi"></i>
-                    </div>
-                    <h5 class="fw-bold">المشاعر الضمنية</h5>
-                    <p class="small text-muted">اكتشاف المشاعر غير المباشرة حتى لو لم يذكر العميل رأيه بشكل صريح بفضل تقنيات NLP.</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.3s;">
-                <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
-                    <div class="mb-4 d-inline-block bg-primary bg-opacity-10 p-4 rounded-circle">
-                        <i class="fas fa-file-export fa-2x text-saudi"></i>
-                    </div>
-                    <h5 class="fw-bold">تقارير تنفيذية</h5>
-                    <p class="small text-muted">ملخصات ذكية باللغة الطبيعية لاتخاذ قرارات فورية دون الحاجة لخبير بيانات.</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.4s;">
-                <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
-                    <div class="mb-4 d-inline-block bg-primary bg-opacity-10 p-4 rounded-circle">
-                        <i class="fas fa-microchip fa-2x text-saudi"></i>
-                    </div>
-                    <h5 class="fw-bold">واجهة برمجة التطبيقات (API)</h5>
-                    <p class="small text-muted">ادمج قوة AraBERT مباشرة في تطبيقاتك وبرامجك الحالية عبر API مطور.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Advanced Features & Tech -->
-<section class="py-5 bg-light">
-    <div class="container py-5">
-        <div class="text-center mb-5 fade-in">
-            <h2 class="display-5 fw-bold text-saudi">تقنيات استراتيجية لنمو مطعمك</h2>
-            <p class="text-muted fs-5">نمزج بين قوة النماذج المحلية والذكاء الاصطناعي التوليدي العالمي</p>
-        </div>
-        <div class="row g-5 align-items-center">
-            <div class="col-lg-6 fade-in">
-                <div class="p-5 bg-white rounded-4 shadow-sm border-start border-4 border-saudi">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-saudi me-3">
-                            <i class="fas fa-magic fa-2x"></i>
+    <!-- Our Services -->
+    <section class="py-5 bg-white">
+        <div class="container py-5">
+            <div class="text-center mb-5 fade-in">
+                <h2 class="display-5 fw-bold text-saudi">حلولنا التخصصية لقطاع الأعمال</h2>
+                <p class="fs-5" style="color: var(--text-muted);">نقدم أدوات تحليلية متكاملة مصممة خصيصاً للتوسع والنمو
+                </p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.1s;">
+                    <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
+                        <div class="mb-4 d-inline-block p-4 rounded-circle" >
+                            <i class="fas fa-layer-group fa-2x text-saudi"></i>
                         </div>
-                        <h4 class="fw-bold mb-0">تحليلات Google Gemini المتقدمة</h4>
+                        <h5 class="fw-bold">تحليل الجوانب (ABSA)</h5>
+                        <p class="small text-muted">تحديد دقيق للمشاعر تجاه كل ميزة أو خدمة على حدة في النص الواحد.</p>
                     </div>
-                    <p class="text-muted mb-4">نستخدم قدرات نماذج Gemini لتقديم **تقارير تنفيذية** نوعية تتجاوز لغة الأرقام. احصل على ملخصات دقيقة وتوصيات عملية مكتوبة بأسلوب بشري رفيع.</p>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><i class="fas fa-check text-saudi me-2"></i> تلخيص آلاف التقييمات في فقرة واحدة.</li>
-                        <li class="mb-2"><i class="fas fa-check text-saudi me-2"></i> استخراج توصيات ذكية لزيادة الأرباح.</li>
-                        <li><i class="fas fa-check text-saudi me-2"></i> فهم السياق المعقد والتهكم (Sarcasm).</li>
-                    </ul>
                 </div>
-            </div>
-            <div class="col-lg-6 fade-in" style="animation-delay: 0.2s;">
-                <div class="p-5 bg-white rounded-4 shadow-sm border-start border-4 border-gold">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-gold me-3">
-                            <i class="fas fa-chart-line fa-2x"></i>
+                <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.2s;">
+                    <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
+                        <div class="mb-4 d-inline-block p-4 rounded-circle" >
+                            <i class="fas fa-brain fa-2x text-saudi"></i>
                         </div>
-                        <h4 class="fw-bold mb-0">تحليلات تفاعلية متطورة</h4>
+                        <h5 class="fw-bold">المشاعر الضمنية</h5>
+                        <p class="small text-muted">اكتشاف المشاعر غير المباشرة حتى لو لم يذكر العميل رأيه بشكل صريح
+                            بفضل تقنيات NLP.</p>
                     </div>
-                    <p class="text-muted mb-4">لوحة تحكم (Dashboard) هي الأحدث من نوعها، تدعم التنقل اللحظي بين أنواع الرسوم البيانية المختلفة واستكشاف البيانات العميقة.</p>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><i class="fas fa-check text-gold me-2"></i> مبدل رسوم ذكي (Pie, Bar, Line).</li>
-                        <li class="mb-2"><i class="fas fa-check text-gold me-2"></i> جداول محورية (Pivot Tables) للفرز المتقدم.</li>
-                        <li><i class="fas fa-check text-gold me-2"></i> تتبع نسبة الثقة (Confidence Level) لكل نص.</li>
-                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.3s;">
+                    <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
+                        <div class="mb-4 d-inline-block p-4 rounded-circle" >
+                            <i class="fas fa-file-export fa-2x text-saudi"></i>
+                        </div>
+                        <h5 class="fw-bold">تقارير تنفيذية</h5>
+                        <p class="small text-muted">ملخصات ذكية باللغة الطبيعية لاتخاذ قرارات فورية دون الحاجة لخبير
+                            بيانات.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.4s;">
+                    <div class="card h-100 p-4 border-0 shadow-sm card-premium text-center">
+                        <div class="mb-4 d-inline-block p-4 rounded-circle" >
+                            <i class="fas fa-microchip fa-2x text-saudi"></i>
+                        </div>
+                        <h5 class="fw-bold">مرونة في محرك التحليل</h5>
+                        <p class="small text-muted">اختر بين التحليل المحلي السريع أو تفعيل Gemini من إعدادات حسابك للحصول على ملخصات تنفيذية أعمق.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Advanced Features (Existing ABSA Section) -->
-<section class="py-5">
-    <div class="container py-5">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6 order-lg-2">
-                <h2 class="display-6 fw-bold text-saudi mb-4">تقنية ABSA: لا نكتفي بالمجمل</h2>
-                <p class="text-muted mb-4 fs-5">خلافاً للأنظمة التقليدية، يقوم AraSent بتحليل كل جانب من جوانب الخدمة
-                    على حدة. هل العميل غاضب من "السعر" أم من جودة "الطعام"؟ نحن نجيبك بدقة.</p>
-                <ul class="list-unstyled">
-                    <li class="mb-3 d-flex align-items-center">
-                        <i class="fas fa-check-circle text-saudi me-3 fa-lg"></i>
-                        <span class="fw-bold">دعم اللهجات العربية المختلفة</span>
-                    </li>
-                    <li class="mb-3 d-flex align-items-center">
-                        <i class="fas fa-check-circle text-saudi me-3 fa-lg"></i>
-                        <span class="fw-bold">استخراج التوصيات الآلية للنمو</span>
-                    </li>
-                    <li class="mb-3 d-flex align-items-center">
-                        <i class="fas fa-check-circle text-saudi me-3 fa-lg"></i>
-                        <span class="fw-bold">معالجة دفعية (Batch) فائقة السرعة</span>
-                    </li>
-                </ul>
+    <!-- Advanced Features & Tech -->
+    <section class="py-5" style="background-color: var(--light-gray);">
+        <div class="container py-5">
+            <div class="text-center mb-5 fade-in">
+                <h2 class="display-5 fw-bold text-saudi">تقنيات استراتيجية لنمو مطعمك</h2>
+                <p class="fs-5" style="color: var(--text-muted);">نمزج بين قوة النماذج المحلية والذكاء الاصطناعي
+                    التوليدي العالمي</p>
             </div>
-            <div class="col-lg-6 order-lg-1">
-                <div class="card border-0 shadow-lg p-3">
-                    <div id="demoChart" style="height: 350px;"></div>
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-6 fade-in">
+                    <div class="p-5 bg-white rounded-4 shadow-sm border-start border-4 border-saudi">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="p-3 rounded-circle me-3"
+                                style="background: rgba(58,138,126,0.1); color: var(--primary-teal);">
+                                <i class="fas fa-magic fa-2x"></i>
+                            </div>
+                            <h4 class="fw-bold mb-0">تحليلات Google Gemini المتقدمة</h4>
+                        </div>
+                        <p class="mb-4" style="color: var(--text-muted);">نستخدم قدرات نماذج Gemini لتقديم تقارير
+                            تنفيذية نوعية تتجاوز لغة الأرقام. احصل على ملخصات دقيقة وتوصيات عملية مكتوبة بأسلوب بشري
+                            رفيع.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-saudi me-2"></i> تلخيص آلاف التقييمات في فقرة
+                                واحدة.</li>
+                            <li class="mb-2"><i class="fas fa-check text-saudi me-2"></i> استخراج توصيات ذكية لزيادة
+                                الأرباح.</li>
+                            <li><i class="fas fa-check text-saudi me-2"></i> فهم السياق المعقد والتهكم (Sarcasm).</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6 fade-in" style="animation-delay: 0.2s;">
+                    <div class="p-5 bg-white rounded-4 shadow-sm border-start border-4 border-gold">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="p-3 rounded-circle me-3"
+                                style="background: rgba(212,175,55,0.1); color: var(--gold-accent);">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                            <h4 class="fw-bold mb-0">تحليلات تفاعلية متطورة</h4>
+                        </div>
+                        <p class="mb-4" style="color: var(--text-muted);">لوحة تحكم (Dashboard) هي الأحدث من نوعها، تدعم
+                            التنقل اللحظي بين أنواع الرسوم البيانية المختلفة واستكشاف البيانات العميقة.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-gold me-2"></i> مبدل رسوم ذكي (Pie, Bar, Line).
+                            </li>
+                            <li class="mb-2"><i class="fas fa-check text-gold me-2"></i> جداول محورية (Pivot Tables)
+                                للفرز المتقدم.</li>
+                            <li><i class="fas fa-check text-gold me-2"></i> تتبع نسبة الثقة (Confidence Level) لكل نص.
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Core Features (Restaurant Focus) -->
-<section class="py-5 bg-dark text-white overflow-hidden" style="background-color: var(--dark-charcoal) !important;">
+    <!-- Core Features -->
+<section class="py-5 overflow-hidden">
     <div class="container py-5">
         <div class="row align-items-center g-5">
             <div class="col-lg-5 fade-in">
-                <h2 class="display-6 fw-bold text-gold mb-4">كفاءة تحليلية تعزز قراراتك</h2>
-                <p class="opacity-75 mb-5 fs-5">نفتخر بتقديم ابتكار سعودي ينافس المعايير العالمية في دقة تحليل المحتوى المحلي المتخصص.</p>
-                
+                <h2 class="display-6 fw-bold text-gold mb-4">قدرات عملية تدعم قرارك</h2>
+                <p class="opacity-75 mb-5 fs-5">يركز AraSent اليوم على ما يهمك فعلاً: تحويل ملفات التقييمات إلى مؤشرات واضحة ولوحة تحليل تساعدك على فهم تجربة العميل بسرعة.</p>
                 <div class="d-flex mb-4">
-                    <div class="flex-shrink-0 bg-white bg-opacity-10 p-3 rounded-3 text-gold">
-                        <i class="fas fa-map-marked-alt fa-xl"></i>
+                    <div class="flex-shrink-0 p-3 rounded-3 text-gold" style="background: rgba(255,255,255,0.08);">
+                        <i class="fas fa-file-arrow-up fa-xl"></i>
                     </div>
                     <div class="ms-3">
-                        <h6 class="fw-bold">ميزة الموقع (Location Feature)</h6>
-                        <p class="small opacity-75">خريطة تفاعلية تظهر جميع فروعك. ضغطة واحدة على الفرع تظهر تحليلاته مباشرة.</p>
+                        <h6 class="fw-bold">رفع ملفات التقييمات</h6>
+                        <p class="small opacity-75">ارفع ملفات CSV أو Excel الخاصة بك، ثم ابدأ التحليل فوراً دون الحاجة إلى تكاملات خارجية معقدة.</p>
                     </div>
                 </div>
                 <div class="d-flex mb-4">
-                    <div class="flex-shrink-0 bg-white bg-opacity-10 p-3 rounded-3 text-gold">
-                        <i class="fas fa-search-dollar fa-xl"></i>
+                    <div class="flex-shrink-0 p-3 rounded-3 text-gold" style="background: rgba(255,255,255,0.08);">
+                        <i class="fas fa-chart-column fa-xl"></i>
                     </div>
                     <div class="ms-3">
-                        <h6 class="fw-bold">مراقب Google Reviews</h6>
-                        <p class="small opacity-75">رصد آلي ومستمر لتقييمات جوجل لكل فرع، مما يضمن سرعة الاستجابة لشكاوى العملاء.</p>
+                        <h6 class="fw-bold">لوحة تحليل تفاعلية</h6>
+                        <p class="small opacity-75">استعرض توزيع المشاعر، والجوانب الأكثر تكراراً، ومستوى الثقة، وجداول التحليل المتقاطع داخل لوحة واحدة.</p>
                     </div>
                 </div>
                 <div class="d-flex">
-                    <div class="flex-shrink-0 bg-white bg-opacity-10 p-3 rounded-3 text-gold">
-                        <i class="fas fa-chart-pie fa-xl"></i>
+                    <div class="flex-shrink-0 p-3 rounded-3 text-gold" style="background: rgba(255,255,255,0.08);">
+                        <i class="fas fa-file-lines fa-xl"></i>
                     </div>
                     <div class="ms-3">
-                        <h6 class="fw-bold">تحليل المنافسين</h6>
-                        <p class="small opacity-75">قارن جودة طعامك وخدمتك مع المطاعم المنافسة بناءً على آراء الجمهور العامة.</p>
+                        <h6 class="fw-bold">ملخصات تنفيذية وسجل محفوظ</h6>
+                        <p class="small opacity-75">احصل على ملخص تنفيذي للنتائج، مع حفظ التحليلات السابقة داخل حسابك للرجوع إليها لاحقاً.</p>
                     </div>
                 </div>
             </div>
             <div class="col-lg-7 fade-in" style="animation-delay: 0.2s;">
                 <div class="row g-4">
                     <div class="col-6">
-                        <div class="card bg-white bg-opacity-10 border-0 p-4 h-100">
-                            <h2 class="fw-bold text-gold mb-2">+100</h2>
-                            <p class="small mb-0">لهجة عربية وسياق محلي مدعوم</p>
+                        <div class="card border-0 p-4 h-100" style="background: rgba(255,255,255,0.07);">
+                            <h2 class="fw-bold text-gold mb-2">7</h2>
+                            <p class="small mb-0 opacity-75">جوانب تحليل أساسية مثل الطعام والخدمة والسعر والنظافة</p>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="card bg-white bg-opacity-10 border-0 p-4 h-100">
-                            <h2 class="fw-bold text-gold mb-2">24/7</h2>
-                            <p class="small mb-0">معالجة لحظية للبيانات المباشرة</p>
+                        <div class="card border-0 p-4 h-100" style="background: rgba(255,255,255,0.07);">
+                            <h2 class="fw-bold text-gold mb-2">3</h2>
+                            <p class="small mb-0 opacity-75">خيارات تحليل: محلي كلاسيكي، متعدد المهام، وGemini</p>
                         </div>
                     </div>
                     <div class="col-12">
-                        <div class="card bg-gold text-dark border-0 p-4">
-                            <h5 class="fw-bold mb-2 text-dark"><i class="fas fa-star me-2"></i> رؤية 2030</h5>
-                            <p class="small mb-0 fw-bold">نحن جزء من منظومة تمكين تقنيات الذكاء الاصطناعي الوطنية لخدمة نمو الاقتصاد الرقمي.</p>
+                        <div class="card border-0 p-4" style="background: var(--gold-accent);">
+                            <h5 class="fw-bold mb-2 text-dark"><i class="fas fa-star me-2"></i>مناسب للمرحلة الحالية</h5>
+                            <p class="small mb-0 fw-bold text-dark">المنصة مهيأة اليوم لتحليل التقييمات المرفوعة من المستخدم، مع قابلية تطوير التكاملات الخارجية لاحقاً عند الحاجة.</p>
                         </div>
                     </div>
                 </div>
@@ -278,42 +353,351 @@
 </section>
 
 <!-- CTA Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="card bg-primary text-white p-5 text-center border-0 shadow-lg" style="background-color: var(--primary-green) !important;">
-            <h2 class="display-5 fw-bold mb-4">هل أنت مستعد لنقل مطعمك للمستوى التالي؟</h2>
-            <p class="lead mb-5 opacity-90">انضم إلى نخبة الشركات التي تعتمد على AraSent في اتخاذ قراراتها اليومية.</p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="/upload" class="btn btn-gold btn-lg px-5 py-3 fw-bold shadow">
-                    ابدأ تجربتك المجانية
-                </a>
-                <a href="/contact" class="btn btn-outline-light btn-lg px-5 py-3">
-                    تحدث مع خبير
-                </a>
+    <section class="py-5">
+        <div class="container">
+            <div class="p-5 text-center text-white border-0 shadow-lg"
+                style="background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-hover) 100%); border-radius: 28px;">
+                <h2 class="display-5 fw-bold mb-4">هل أنت مستعد لنقل مطعمك للمستوى التالي؟</h2>
+                <p class="lead mb-5 opacity-90">انضم إلى نخبة الشركات التي تعتمد على AraSent في اتخاذ قراراتها اليومية.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="/upload" class="btn btn-gold btn-lg px-5 py-3 fw-bold shadow rounded-pill">
+                        ابدأ تجربتك المجانية
+                    </a>
+                    <a href="/contact" class="btn btn-white btn-lg px-5 py-3 rounded-pill fw-bold">
+                        تحدث مع خبير
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-{% endblock %}
+    {% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-<script>
-    // Demo Chart for Homepage
-    const trace1 = {
-        x: ['الطعام', 'الخدمة', 'السعر', 'النظافة'],
-        y: [85, 40, 70, 95],
-        name: 'إيجابي',
-        type: 'bar',
-        marker: { color: '#006C35' }
-    };
-    const layout = {
-        title: 'عرض تجريبي لتحليل الجوانب',
-        barmode: 'group',
-        margin: { t: 50, b: 30, l: 40, r: 20 },
-        font: { family: 'Tajawal' }
-    };
-    Plotly.newPlot('demoChart', [trace1], layout, { responsive: true, displayModeBar: false });
-</script>
-{% endblock %}
+    {% block extra_js %}
+    <script src="{{ url_for('static', filename='vendor/plotly/plotly-2.32.0.min.js') }}"></script>
+
+    <style>
+        /* ============================
+   Hero Dashboard Mockup Styles
+   ============================ */
+        .hero-dashboard-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: 0 20px 60px rgba(58, 138, 126, 0.15), 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(58, 138, 126, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* DB Header */
+        .db-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(58, 138, 126, 0.1);
+        }
+
+        .db-live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .db-live-dot {
+            width: 7px;
+            height: 7px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: livePulse 1.4s infinite;
+        }
+
+        @keyframes livePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.7);
+            }
+        }
+
+        /* Stats Row */
+        .db-stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .db-stat-card {
+            flex: 1;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .db-stat-card.positive {
+            background: rgba(58, 138, 126, 0.07);
+        }
+
+        .db-stat-card.negative {
+            background: rgba(224, 92, 92, 0.07);
+        }
+
+        .db-stat-card.neutral {
+            background: rgba(212, 175, 55, 0.07);
+        }
+
+        .db-stat-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .db-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .db-stat-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .db-stat-card.positive .db-stat-value {
+            color: var(--primary-teal);
+        }
+
+        .db-stat-card.negative .db-stat-value {
+            color: #e05c5c;
+        }
+
+        .db-stat-card.neutral .db-stat-value {
+            color: var(--gold-accent);
+        }
+
+        .db-progress-bar {
+            height: 5px;
+            background: rgba(0, 0, 0, 0.07);
+            border-radius: 5px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .db-progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .positive-fill {
+            background: var(--primary-teal);
+        }
+
+        .negative-fill {
+            background: #e05c5c;
+        }
+
+        .neutral-fill {
+            background: var(--gold-accent);
+        }
+
+        /* Bottom Row */
+        .db-bottom-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .db-chart-wrap {
+            flex: 1.2;
+            min-width: 0;
+        }
+
+        .db-topics-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .db-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .db-topic-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 6px;
+        }
+
+        .db-topic-item:hover {
+            background: rgba(58, 138, 126, 0.06);
+            padding-right: 6px;
+        }
+
+        .db-topic-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .db-topic-item span:nth-child(2) {
+            flex: 1;
+            color: var(--text-dark);
+        }
+
+        .db-topic-score {
+            font-weight: 700;
+            font-size: 0.78rem;
+        }
+
+        .positive-text {
+            color: var(--primary-teal);
+        }
+
+        .negative-text {
+            color: #e05c5c;
+        }
+
+        .neutral-text {
+            color: var(--gold-accent);
+        }
+
+        /* Footer */
+        .db-footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding-top: 10px;
+            border-top: 1px solid rgba(58, 138, 126, 0.08);
+        }
+
+        .db-footer-note i {
+            color: var(--gold-accent);
+        }
+    </style>
+
+    <script>
+        /* ============================
+           Dashboard Animated Counters
+           ============================ */
+        function animateCounter(elementId, target, suffix) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            let current = 0;
+            const step = target / 50;
+            const interval = setInterval(() => {
+                current = Math.min(current + step, target);
+                el.textContent = Math.round(current) + suffix;
+                if (current >= target) clearInterval(interval);
+            }, 25);
+        }
+
+        function animateProgressBars() {
+            document.querySelectorAll('.db-progress-fill').forEach(bar => {
+                const target = bar.dataset.target;
+                setTimeout(() => { bar.style.width = target + '%'; }, 300);
+            });
+        }
+
+        /* ============================
+           Hero Trend Chart (Plotly)
+           ============================ */
+        function buildTrendChart() {
+            const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'];
+            const positive = [60, 65, 70, 68, 75, 78];
+            const negative = [25, 22, 18, 20, 16, 15];
+
+            const trPos = {
+                x: months, y: positive,
+                name: 'إيجابي',
+                type: 'scatter', mode: 'lines',
+                line: { color: '#3a8a7e', width: 2.5, shape: 'spline' },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(58,138,126,0.08)'
+            };
+            const trNeg = {
+                x: months, y: negative,
+                name: 'سلبي',
+                type: 'scatter', mode: 'lines',
+                line: { color: '#e05c5c', width: 2, shape: 'spline', dash: 'dot' },
+            };
+
+            const layout = {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                margin: { t: 5, b: 22, l: 28, r: 5 },
+                font: { family: 'Tajawal', size: 10, color: '#6b847f' },
+                showlegend: false,
+                hovermode: 'x unified',
+                xaxis: { gridcolor: 'rgba(58,138,126,0.08)', tickfont: { size: 9 } },
+                yaxis: { gridcolor: 'rgba(58,138,126,0.08)', range: [0, 100], tickfont: { size: 9 } },
+            };
+
+            Plotly.newPlot('heroTrendChart', [trPos, trNeg], layout, {
+                responsive: true,
+                displayModeBar: false,
+                config: { locale: 'ar' }
+            });
+        }
+
+        /* ============================
+           IntersectionObserver trigger
+           ============================ */
+        const dashCard = document.querySelector('.hero-dashboard-card');
+        if (dashCard) {
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    animateCounter('posCount', 78, '%');
+                    animateCounter('negCount', 15, '%');
+                    animateCounter('neuCount', 7, '%');
+                    animateProgressBars();
+                    buildTrendChart();
+                    observer.disconnect();
+                }
+            }, { threshold: 0.3 });
+            observer.observe(dashCard);
+        }
+    </script>
+    {% endblock %}

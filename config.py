@@ -17,7 +17,6 @@ class Config:
     ASPECT_MODEL_PATH = os.path.join(basedir, 'models', 'aspect_extractor_final')
     SENTIMENT_MODEL_PATH = os.path.join(basedir, 'models', 'sentiment_model_final')
     
-    ARABERT_MODEL = 'aubmindlab/bert-base-arabertv2'
     
     ASPECTS = {
         'food': 'الطعام',
