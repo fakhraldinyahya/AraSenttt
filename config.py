@@ -14,8 +14,6 @@ class Config:
         'sqlite:///' + os.path.join(basedir, 'instance', 'site.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    ASPECT_MODEL_PATH = os.path.join(basedir, 'models', 'aspect_extractor_final')
-    SENTIMENT_MODEL_PATH = os.path.join(basedir, 'models', 'sentiment_model_final')
     
     
     ASPECTS = {

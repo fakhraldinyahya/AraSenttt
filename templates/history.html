@@ -90,6 +90,8 @@
                                     <span class="model-badge"><i class="fas fa-robot"></i> Gemini AI</span>
                                 {% elif analysis.model_used == 'arasant_local' %}
                                     <span class="model-badge"><i class="fas fa-bolt"></i> AraSent المحلي</span>
+                                {% elif analysis.model_used == 'arasant_local_fallback' %}
+                                    <span class="model-badge text-warning border-warning"><i class="fas fa-life-ring"></i> AraSent (بديل لـ Gemini)</span>
                                 {% else %}
                                     <span class="model-badge"><i class="fas fa-microchip"></i> غير محدد</span>
                                 {% endif %}

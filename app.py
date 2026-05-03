@@ -22,6 +22,7 @@ from utils.reporting_service import AnalysisReportingService
 from utils.upload_service import build_analysis_cache_key, detect_text_column, read_uploaded_dataframe
 
 app = Flask(__name__)
+basedir = os.path.abspath(os.path.dirname(__file__))
 app.config.from_object(Config)
 CORS(app)
 
@@ -75,6 +76,7 @@ from utils.manager import model_manager
 
 def ensure_storage_dirs():
     """Create storage directories if they are missing at runtime."""
+    os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['DATA_RAW_FOLDER'], exist_ok=True)
     os.makedirs(app.config['DATA_PROCESSED_FOLDER'], exist_ok=True)
@@ -192,17 +194,21 @@ def upload_file():
                 if len(df) > limit:
                     df = df.head(limit)
                     is_sliced = True
-                    slice_message = f"تم تحليل أول {limit} تقييمات كعينة تجريبية. لمعاينة الملف كاملاً، تفضل بإنشاء حساب مجاني!"
+                    slice_message = f"سيتم تحليل أول {limit} تقييماً فقط كعينة تجريبية. لتحليل الملف كاملاً، أنشئ حساباً مجانياً!"
             
             column_detection = detect_text_column(df)
 
-            raw_path = os.path.join(app.config['DATA_RAW_FOLDER'], f'{datetime.now().strftime("%Y%m%d_%H%M%S")}_{filename}')
+            # Save the (potentially sliced) dataframe as the raw file used for analysis
+            base_name = os.path.splitext(filename)[0]
+            raw_filename = f'{datetime.now().strftime("%Y%m%d_%H%M%S")}_{base_name}.csv'
+            raw_path = os.path.join(app.config['DATA_RAW_FOLDER'], raw_filename)
             df.to_csv(raw_path, index=False)
             
             return jsonify({
-                'success': True, 
-                'filename': filename, 
-                'rows': len(df), 
+                'success': True,
+                'filename': filename,
+                'raw_filename': raw_filename,
+                'rows': len(df),
                 'columns': list(df.columns),
                 'column_detection': column_detection,
                 'sliced': is_sliced,
@@ -216,10 +222,16 @@ def upload_file():
 def analyze_file(filename):
     ensure_storage_dirs()
 
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    # Prefer the pre-sliced raw CSV (saved during upload) so guests are limited correctly.
+    # The client now sends raw_filename; fall back to the original upload if not provided.
+    raw_filename = request.args.get('raw_filename', '').strip()
+    if raw_filename:
+        filepath = os.path.join(app.config['DATA_RAW_FOLDER'], raw_filename)
+    else:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
     if not os.path.exists(filepath):
         return jsonify({'error': 'الملف غير موجود'}), 404
-        
     try:
         df = read_uploaded_dataframe(filepath)
     except Exception as e:
@@ -289,8 +301,9 @@ def analyze_file(filename):
             # تسجيل العملية في History كـ (إعادة اطلاع) بدون إعادة تحليل
             if current_user.is_authenticated:
                 try:
-                    # internal_filename is globally unique in the current schema.
+                    # Check if THIS user already has this analysis in their history
                     existing_record = AnalysisHistory.query.filter_by(
+                        user_id=current_user.id,
                         internal_filename=base_name
                     ).first()
 
@@ -307,9 +320,10 @@ def analyze_file(filename):
                         )
                         db.session.add(history_record)
                         db.session.commit()
+                        print(f"Added missing History record for user {current_user.id} on cache-hit")
                 except Exception as history_error:
                     db.session.rollback()
-                    print(f"History save skipped on cache-hit: {history_error}")
+                    print(f"History save error on cache-hit: {str(history_error)}")
                 
             return jsonify({
                 'success': True,
@@ -353,8 +367,16 @@ def analyze_file(filename):
             results = temp_analyzer.analyze_batch(texts)
             provider = 'gemini'
         except Exception as e:
-            print(f"Gemini Analysis Error: {e}")
-            return jsonify({'error': f'فشل الاتصال بـ Gemini المحترف: {str(e)}'}), 500
+            print(f"Gemini Analysis Error: {e}, falling back to AraSent local model...")
+            # Fallback to AraSent local
+            try:
+                from utils.manager import model_manager
+                if not getattr(model_manager, 'arasant_analyzer', None):
+                    model_manager.load_arasant_model()
+                results = model_manager.analyze_batch_arasant(texts)
+                provider = 'arasant_local_fallback'
+            except Exception as arasant_e:
+                return jsonify({'error': f'فشل Gemini وفشل الموديل المحلي أيضاً: {str(arasant_e)}'}), 500
 
     # مسار 3: AraSent كمسار افتراضي وFallback
     else:
@@ -398,8 +420,9 @@ def analyze_file(filename):
     # === حفظ السجل في قاعدة البيانات (للمسجلين فقط) ===
     if current_user.is_authenticated:
         try:
-            # Check if this exact analysis already exists to avoid duplicates on refresh
+            # Check if this user already has this exact analysis in history
             existing_record = AnalysisHistory.query.filter_by(
+                user_id=current_user.id,
                 internal_filename=base_name
             ).first()
             
@@ -416,9 +439,9 @@ def analyze_file(filename):
                 )
                 db.session.add(history_record)
                 db.session.commit()
-                print(f"Saved AnalysisHistory for {base_name}")
+                print(f"Saved new AnalysisHistory for user {current_user.id}: {base_name}")
         except Exception as e:
-            print(f"Error saving analysis history: {e}")
+            print(f"Error saving analysis history: {str(e)}")
             db.session.rollback()
     
     return jsonify({
@@ -427,6 +450,7 @@ def analyze_file(filename):
         'stats': stats,
         'base_name': base_name,
         'text_column': text_column,
+        'provider': provider
     })
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -453,14 +477,23 @@ def delete_history(analysis_id):
         return jsonify({'success': False, 'error': 'غير مصرح'}), 403
         
     try:
-        # Delete associated files if they exist
-        processed_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.csv')
-        summary_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.json')
-        
-        if os.path.exists(processed_path):
-            os.remove(processed_path)
-        if os.path.exists(summary_path):
-            os.remove(summary_path)
+        # Only delete physical files if NO other history record uses this same hash
+        # (This is important for shared cache in multi-user environments)
+        other_uses = AnalysisHistory.query.filter(
+            AnalysisHistory.internal_filename == analysis.internal_filename,
+            AnalysisHistory.id != analysis.id
+        ).first()
+
+        if not other_uses:
+            processed_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.csv')
+            summary_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.json')
+            
+            if os.path.exists(processed_path):
+                os.remove(processed_path)
+            if os.path.exists(summary_path):
+                os.remove(summary_path)
+        else:
+            print(f"Skipping file deletion for {analysis.internal_filename} as it is used by other records.")
             
         db.session.delete(analysis)
         db.session.commit()
@@ -512,7 +545,9 @@ def get_results(base_name):
                     'provider': row.get('provider', 'cached')
                 })
             stats = _calculate_stats(results)
-            return jsonify({'success': True, 'results': results, 'stats': stats})
+            # Get the provider from the first result if available
+            provider = results[0].get('provider') if results else 'unknown'
+            return jsonify({'success': True, 'results': results, 'stats': stats, 'provider': provider})
         except Exception as e:
             return jsonify({'success': False, 'error': f"Error reading cached results: {e}"}), 500
     

@@ -54,3 +54,6 @@ tzdata==2025.3
 Werkzeug==3.1.6
 google-genai
 markdown
+flask-login
+flask-sqlalchemy
+flask-bcrypt

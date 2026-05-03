@@ -25,6 +25,17 @@
                 البيانات</a>
         </div>
     </div>
+    
+    <!-- Fallback Alert -->
+    <div id="fallbackAlert" class="alert alert-warning border-0 shadow-sm mb-4 fade-in" style="display: none; border-right: 5px solid #ffc107 !important;">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+            <div>
+                <h6 class="fw-bold mb-1">تم استخدام نظام التحليل البديل</h6>
+                <p class="mb-0 small">تعذر الاتصال بـ Gemini AI حالياً، تم إكمال التحليل باستخدام موديل AraSent المحلي لضمان استمرارية عملك.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Quick Stats -->
     <div class="row g-4 mb-5 fade-in" style="animation-delay: 0.1s;">
@@ -291,8 +302,15 @@
                 throw new Error(data.message || data.error);
             }
 
-            const { stats, results } = data;
+            const { stats, results, provider } = data;
             currentData = results;
+
+            // Show fallback alert if needed
+            if (provider === 'arasant_local_fallback') {
+                document.getElementById('fallbackAlert').style.display = 'block';
+            } else {
+                document.getElementById('fallbackAlert').style.display = 'none';
+            }
 
             document.getElementById('totalReviews').textContent = stats.total_reviews;
             document.getElementById('positiveCount').textContent = stats.sentiment_distribution['إيجابي'] || 0;
