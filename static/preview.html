@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AraSent - Preview</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary-teal: #3a8a7e;
+  --primary-hover: #2d7068;
+  --teal-light: #abcfc8;
+  --teal-mid: #6aada4;
+  --gold-accent: #D4AF37;
+  --text-dark: #1a2e2b;
+  --text-muted: #6b847f;
+  --transition-smooth: all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+* { box-sizing: border-box; }
+body { font-family: 'Tajawal', sans-serif; margin:0; background:#f4f9fb; }
+
+/* NAVBAR */
+.navbar {
+  background: transparent;
+  position: fixed; top:0; left:0; right:0; z-index:1050;
+  padding: 18px 0;
+  transition: background 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;
+}
+.navbar.scrolled {
+  background: rgba(255,255,255,0.97) !important;
+  box-shadow: 0 4px 20px rgba(58,138,126,0.12);
+  padding: 10px 0;
+  border-bottom: 2px solid rgba(58,138,126,0.15);
+  backdrop-filter: blur(10px);
+}
+.nav-inner { max-width:1200px; margin:auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; }
+.nav-logo img { height:40px; }
+.nav-links { display:flex; gap:8px; list-style:none; margin:0; padding:0; }
+.nav-links a {
+  text-decoration:none; color:var(--text-dark); font-weight:600;
+  padding:8px 14px; border-radius:8px; font-size:0.93rem;
+  transition:color 0.2s;
+}
+.nav-links a:hover { color:var(--primary-teal); }
+.nav-actions { display:flex; gap:10px; align-items:center; }
+.btn-login { background:none; border:none; font-family:'Tajawal',sans-serif; font-weight:600; color:var(--text-dark); cursor:pointer; font-size:0.93rem; }
+.btn-start { background:var(--gold-accent); color:#1a2e2b; border:none; border-radius:50px; padding:10px 24px; font-family:'Tajawal',sans-serif; font-weight:700; cursor:pointer; font-size:0.93rem; transition:all 0.2s; }
+.btn-start:hover { background:#c9a22e; transform:translateY(-1px); }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #fafafa 0%, #daf1fd 55%, #abcfc8 100%);
+  display: flex; align-items: center;
+  padding: 110px 0 60px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content:''; position:absolute; top:-80px; left:-80px;
+  width:400px; height:400px;
+  background: radial-gradient(circle, rgba(58,138,126,0.10) 0%, transparent 70%);
+}
+.hero::after {
+  content:''; position:absolute; bottom:-60px; right:-60px;
+  width:320px; height:320px;
+  background: radial-gradient(circle, rgba(171,207,200,0.25) 0%, transparent 70%);
+}
+.hero-inner { max-width:1200px; margin:auto; padding:0 24px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; position:relative; z-index:1; }
+.hero-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background: rgba(58,138,126,0.11); color:var(--primary-teal);
+  padding:6px 16px; border-radius:50px; font-weight:700; font-size:0.88rem; margin-bottom:18px;
+}
+.hero-title { font-size:2.8rem; font-weight:800; color:var(--text-dark); line-height:1.2; margin-bottom:18px; }
+.hero-title .highlight {
+  background: linear-gradient(135deg, var(--primary-teal), var(--teal-mid));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero-desc { color:var(--text-muted); font-size:1.05rem; line-height:1.7; margin-bottom:28px; max-width:460px; }
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
+.btn-cta {
+  background:var(--gold-accent); color:#1a2e2b; border:none; border-radius:50px;
+  padding:14px 32px; font-family:'Tajawal',sans-serif; font-weight:700; font-size:1rem;
+  cursor:pointer; box-shadow:0 4px 20px rgba(212,175,55,0.25); transition:all 0.2s;
+}
+.btn-cta:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(212,175,55,0.35); }
+.btn-secondary {
+  background:transparent; color:var(--primary-teal);
+  border:2px solid var(--primary-teal); border-radius:50px;
+  padding:12px 28px; font-family:'Tajawal',sans-serif; font-weight:600; font-size:1rem;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-secondary:hover { background:var(--primary-teal); color:#fff; }
+.trust-items { display:flex; gap:18px; flex-wrap:wrap; }
+.trust-item { display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-muted); }
+.trust-item i { color:var(--primary-teal); }
+
+/* DASHBOARD CARD */
+.hero-dashboard-card {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 20px 60px rgba(58,138,126,0.15), 0 4px 20px rgba(0,0,0,0.06);
+  border: 1px solid rgba(255,255,255,0.8);
+  position: relative; overflow: hidden;
+  animation: slideUp 0.8s 0.2s both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.db-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px; padding-bottom:12px;
+  border-bottom: 1px solid rgba(58,138,126,0.1);
+}
+.db-header-title { display:flex; align-items:center; gap:8px; font-weight:700; font-size:0.95rem; color:var(--text-dark); }
+.db-header-title i { color:var(--primary-teal); }
+.db-live-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(40,167,69,0.1); color:#28a745;
+  font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:20px;
+}
+.db-live-dot {
+  width:7px; height:7px; background:#28a745; border-radius:50%;
+  animation: livePulse 1.4s infinite;
+}
+@keyframes livePulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.4; transform:scale(0.7); }
+}
+.db-stats-row { display:flex; gap:10px; margin-bottom:16px; }
+.db-stat-card {
+  flex:1; border-radius:14px; padding:12px;
+  display:flex; align-items:flex-start; gap:8px;
+}
+.db-stat-card.pos { background:rgba(58,138,126,0.07); }
+.db-stat-card.neg { background:rgba(224,92,92,0.07); }
+.db-stat-card.neu { background:rgba(212,175,55,0.07); }
+.db-stat-icon { font-size:1.4rem; line-height:1; }
+.db-stat-label { font-size:0.68rem; color:var(--text-muted); margin-bottom:3px; }
+.db-stat-value { font-size:1.5rem; font-weight:800; line-height:1; margin-bottom:7px; }
+.db-stat-card.pos .db-stat-value { color:var(--primary-teal); }
+.db-stat-card.neg .db-stat-value { color:#e05c5c; }
+.db-stat-card.neu .db-stat-value { color:var(--gold-accent); }
+.db-progress-bar { height:5px; background:rgba(0,0,0,0.07); border-radius:5px; overflow:hidden; }
+.db-progress-fill {
+  height:100%; border-radius:5px; width:0;
+  transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
+}
+.pos-fill { background:var(--primary-teal); }
+.neg-fill { background:#e05c5c; }
+.neu-fill { background:var(--gold-accent); }
+.db-bottom-row { display:flex; gap:14px; margin-bottom:12px; }
+.db-chart-wrap { flex:1.2; min-width:0; }
+.db-topics-wrap { flex:1; min-width:0; }
+.db-section-title {
+  font-size:0.72rem; font-weight:700; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;
+}
+.db-topic-item {
+  display:flex; align-items:center; gap:7px; font-size:0.8rem;
+  padding:5px 6px; border-bottom:1px solid rgba(0,0,0,0.04);
+  border-radius:6px; cursor:pointer; transition:all 0.2s;
+}
+.db-topic-item:hover { background:rgba(58,138,126,0.06); }
+.db-topic-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.db-topic-item span.label { flex:1; color:var(--text-dark); }
+.db-topic-score { font-weight:700; font-size:0.78rem; }
+.pos-text { color:var(--primary-teal); }
+.neg-text { color:#e05c5c; }
+.neu-text { color:var(--gold-accent); }
+.db-footer-note {
+  text-align:center; font-size:0.75rem; color:var(--text-muted);
+  padding-top:10px; border-top:1px solid rgba(58,138,126,0.08);
+}
+.db-footer-note i { color:var(--gold-accent); }
+
+@media (max-width:900px) {
+  .hero-inner { grid-template-columns:1fr; }
+  .hero-title { font-size:2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="mainNavbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <img src="/static/img/logo.jpeg" alt="AraSent" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span style="display:none; font-weight:800; font-size:1.4rem; color:var(--text-dark);">🅐 AraSent</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">الرئيسية</a></li>
+      <li><a href="#">عن المنصة</a></li>
+      <li><a href="#">فريق العمل</a></li>
+      <li><a href="#">تواصل معنا</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-login">تسجيل الدخول</button>
+      <button class="btn-start">ابدأ مجاناً</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <!-- Left: Text -->
+    <div>
+      <div class="hero-badge">
+        <i class="fas fa-microchip"></i> مدعومة بالذكاء الاصطناعي
+      </div>
+      <h1 class="hero-title">
+        حوّل تقييمات <span class="highlight">Google</span><br>إلى رؤى استراتيجية
+      </h1>
+      <p class="hero-desc">
+        المنصة السعودية الرائدة لمساعدة أصحاب المطاعم على تحليل آراء العملاء بدقة الذكاء الاصطناعي،
+        وفهم كل تفاصيل الخدمة والجودة في جميع فروعك.
+      </p>
+      <div class="hero-btns">
+        <button class="btn-cta"><i class="fas fa-rocket" style="margin-left:8px;"></i> ابدأ التحليل الان</button>
+        <button class="btn-secondary"><i class="fas fa-play" style="margin-left:8px;"></i> كيف يعمل؟</button>
+      </div>
+      <div class="trust-items">
+        <div class="trust-item"><i class="fas fa-check-circle"></i> دون بطاقة ائتمان</div>
+        <div class="trust-item"><i class="fas fa-check-circle"></i> نتائج فورية</div>
+        <div class="trust-item"><i class="fas fa-check-circle"></i> آمن وموثوق</div>
+      </div>
+    </div>
+
+    <!-- Right: Dashboard Mockup -->
+    <div class="hero-dashboard-card">
+      <!-- Header -->
+      <div class="db-header">
+        <div class="db-header-title">
+          <i class="fas fa-chart-line"></i> تحليل التقييمات
+        </div>
+        <span class="db-live-badge"><span class="db-live-dot"></span> مباشر</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="db-stats-row">
+        <div class="db-stat-card pos">
+          <div class="db-stat-icon">😊</div>
+          <div style="width:100%">
+            <div class="db-stat-label">المشاعر الإيجابية</div>
+            <div class="db-stat-value" id="posCount">0%</div>
+            <div class="db-progress-bar"><div class="db-progress-fill pos-fill" data-target="78"></div></div>
+          </div>
+        </div>
+        <div class="db-stat-card neg">
+          <div class="db-stat-icon">😠</div>
+          <div style="width:100%">
+            <div class="db-stat-label">المشاعر السلبية</div>
+            <div class="db-stat-value" id="negCount">0%</div>
+            <div class="db-progress-bar"><div class="db-progress-fill neg-fill" data-target="15"></div></div>
+          </div>
+        </div>
+        <div class="db-stat-card neu">
+          <div class="db-stat-icon">😐</div>
+          <div style="width:100%">
+            <div class="db-stat-label">المحايدة</div>
+            <div class="db-stat-value" id="neuCount">0%</div>
+            <div class="db-progress-bar"><div class="db-progress-fill neu-fill" data-target="7"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart + Topics -->
+      <div class="db-bottom-row">
+        <div class="db-chart-wrap">
+          <div class="db-section-title">اتجاهات التقييمات</div>
+          <div id="heroTrendChart" style="height:130px;"></div>
+        </div>
+        <div class="db-topics-wrap">
+          <div class="db-section-title">أبرز المواضيع</div>
+          <div class="db-topic-item">
+            <span class="db-topic-dot" style="background:#3a8a7e;"></span>
+            <span class="label">جودة الطعام</span>
+            <span class="db-topic-score pos-text">+85%</span>
+          </div>
+          <div class="db-topic-item">
+            <span class="db-topic-dot" style="background:#6aada4;"></span>
+            <span class="label">خدمة العملاء</span>
+            <span class="db-topic-score pos-text">+70%</span>
+          </div>
+          <div class="db-topic-item">
+            <span class="db-topic-dot" style="background:#D4AF37;"></span>
+            <span class="label">الأسعار</span>
+            <span class="db-topic-score neu-text">~55%</span>
+          </div>
+          <div class="db-topic-item">
+            <span class="db-topic-dot" style="background:#e05c5c;"></span>
+            <span class="label">النظافة</span>
+            <span class="db-topic-score neg-text">-20%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="db-footer-note">
+        <i class="fas fa-bolt"></i> تم تحليل 1,247 تقييم في 3.2 ثانية
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script>
+// Navbar scroll
+const nav = document.getElementById('mainNavbar');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+}, { passive: true });
+
+// Counter animation
+function animateCounter(id, target, suffix) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let cur = 0;
+  const step = target / 50;
+  const iv = setInterval(() => {
+    cur = Math.min(cur + step, target);
+    el.textContent = Math.round(cur) + suffix;
+    if (cur >= target) clearInterval(iv);
+  }, 25);
+}
+
+// Progress bars
+function animateBars() {
+  document.querySelectorAll('.db-progress-fill').forEach(b => {
+    setTimeout(() => { b.style.width = b.dataset.target + '%'; }, 300);
+  });
+}
+
+// Trend Chart
+function buildChart() {
+  const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو'];
+  Plotly.newPlot('heroTrendChart', [
+    {
+      x: months, y: [60,65,70,68,75,78],
+      name:'إيجابي', type:'scatter', mode:'lines',
+      line:{ color:'#3a8a7e', width:2.5, shape:'spline' },
+      fill:'tozeroy', fillcolor:'rgba(58,138,126,0.08)'
+    },
+    {
+      x: months, y: [25,22,18,20,16,15],
+      name:'سلبي', type:'scatter', mode:'lines',
+      line:{ color:'#e05c5c', width:2, shape:'spline', dash:'dot' }
+    }
+  ], {
+    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+    margin:{ t:5, b:22, l:28, r:5 },
+    font:{ family:'Tajawal', size:10, color:'#6b847f' },
+    showlegend:false, hovermode:'x unified',
+    xaxis:{ gridcolor:'rgba(58,138,126,0.08)', tickfont:{size:9} },
+    yaxis:{ gridcolor:'rgba(58,138,126,0.08)', range:[0,100], tickfont:{size:9} }
+  }, { responsive:true, displayModeBar:false });
+}
+
+// Trigger on load
+window.addEventListener('load', () => {
+  animateCounter('posCount', 78, '%');
+  animateCounter('negCount', 15, '%');
+  animateCounter('neuCount', 7,  '%');
+  animateBars();
+  buildChart();
+});
+</script>
+</body>
+</html>

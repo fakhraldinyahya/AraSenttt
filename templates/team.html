@@ -3,10 +3,10 @@
 {% block title %}AraSent - فريق العمل والخبراء{% endblock %}
 
 {% block content %}
-<section class="py-5 bg-light text-center">
+<section class="py-5 bg-light text-center" style="background: linear-gradient(var(--bg-gradient-end) 0%,var(--bg-gradient-mid) 50%,var(--bg-gradient-start) 100%) !important">
     <div class="container py-5 fade-in">
-        <h1 class="display-4 fw-800 text-saudi mb-3">العقول المبدعة خلف AraSent</h1>
-        <p class="text-muted fs-5">فريق من خبراء الذكاء الاصطناعي ومهندسي البيانات يعملون لشغفهم باللغة العربية.</p>
+        <h1 class="display-4 fw-800 text-saudi mb-3">النخبة وراء AraSent</h1>
+        <p class="text-muted fs-5">نخبة من الكفاءات الوطنية المتخصصة في الذكاء الاصطناعي وعلوم البيانات، يجمعهم الشغف بالابتكار وخدمة اللغة العربية.</p>
     </div>
 </section>
 
@@ -16,11 +16,11 @@
         <div class="col-md-4 fade-in" style="animation-delay: 0.1s;">
             <div class="card h-100 text-center border-0 shadow-sm p-4">
                 <div class="mb-4">
-                    <img src="https://via.placeholder.com/150/007bff/ffffff?text=AI+Expert" alt="Member"
+                    <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Member"
                         class="rounded-circle shadow" width="150">
                 </div>
-                <h4 class="fw-bold text-saudi">م. اية </h4>
-                <p class="text-muted mb-3">طالب علوم حاسوب</p>
+                <h4 class="fw-bold text-primary">آيه الجحدلي</h4>
+                <p class="text-muted mb-3">طالبة نظم معلومات</p>
                 <div class="d-flex justify-content-center gap-2">
                     <a href="#" class="btn btn-outline-primary btn-sm rounded-circle"><i
                             class="fab fa-linkedin-in"></i></a>
@@ -32,11 +32,26 @@
         <div class="col-md-4 fade-in" style="animation-delay: 0.2s;">
             <div class="card h-100 text-center border-0 shadow-sm p-4">
                 <div class="mb-4">
-                    <img src="https://via.placeholder.com/150/28a745/ffffff?text=Data+Scientist" alt="Member"
+                    <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Member"
                         class="rounded-circle shadow" width="150">
                 </div>
-                <h4 class="fw-bold text-saudi">م.  ......</h4>
-                <p class="text-muted mb-3">طالب علوم حاسوب</p>
+                <h4 class="fw-bold text-primary">وجد الحربي</h4>
+                <p class="text-muted mb-3">طالبة نظم معلومات</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="#" class="btn btn-outline-primary btn-sm rounded-circle"><i
+                            class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="btn btn-outline-primary btn-sm rounded-circle"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 fade-in" style="animation-delay: 0.2s;">
+            <div class="card h-100 text-center border-0 shadow-sm p-4">
+                <div class="mb-4">
+                    <img src="{{ url_for('static', filename='img/profile.png') }}" alt="Member"
+                        class="rounded-circle shadow" width="150">
+                </div>
+                <h4 class="fw-bold text-primary">رندة النوبي</h4>
+                <p class="text-muted mb-3">طالبة نظم معلومات</p>
                 <div class="d-flex justify-content-center gap-2">
                     <a href="#" class="btn btn-outline-primary btn-sm rounded-circle"><i
                             class="fab fa-linkedin-in"></i></a>

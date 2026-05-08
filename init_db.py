@@ -6,9 +6,11 @@ from db_models.user import User, GlobalSetting, AnalysisHistory
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+bcrypt.init_app(app)
 
 with app.app_context():
     db.drop_all() # Reset for schema changes
+    print("Database tables dropped.")
     db.create_all()
     
     # Create default settings

@@ -27,7 +27,7 @@ class AnalysisHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     original_filename = db.Column(db.String(255), nullable=False)
-    internal_filename = db.Column(db.String(255), unique=True, nullable=False)
+    internal_filename = db.Column(db.String(255), nullable=False)
     model_used = db.Column(db.String(50), nullable=False)
     total_reviews = db.Column(db.Integer, default=0)
     positive_count = db.Column(db.Integer, default=0)

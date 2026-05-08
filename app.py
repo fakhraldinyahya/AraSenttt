@@ -11,7 +11,6 @@ import plotly.graph_objects as go
 from datetime import datetime
 import re
 import ast
-import hashlib
 import markdown
 
 from config import Config
@@ -19,8 +18,11 @@ from extensions import db, bcrypt, login_manager
 from db_models.user import User, GlobalSetting, AnalysisHistory
 from functools import wraps
 from utils.gemini_analyzer import GeminiAnalyzer
+from utils.reporting_service import AnalysisReportingService
+from utils.upload_service import build_analysis_cache_key, detect_text_column, read_uploaded_dataframe
 
 app = Flask(__name__)
+basedir = os.path.abspath(os.path.dirname(__file__))
 app.config.from_object(Config)
 CORS(app)
 
@@ -29,6 +31,28 @@ bcrypt.init_app(app)
 login_manager.init_app(app)
 
 from db_models.user import User
+
+def initialize_database():
+    """Ensure required tables and defaults exist before serving requests."""
+    with app.app_context():
+        db.create_all()
+
+        if not GlobalSetting.query.filter_by(key='guest_analysis_limit').first():
+            db.session.add(GlobalSetting(key='guest_analysis_limit', value='50'))
+
+        admin_email = "admin@arasent.ai"
+        if not User.query.filter_by(email=admin_email).first():
+            hashed_pw = bcrypt.generate_password_hash('admin123').decode('utf-8')
+            db.session.add(User(
+                username='admin',
+                email=admin_email,
+                password_hash=hashed_pw,
+                is_admin=True
+            ))
+
+        db.session.commit()
+
+initialize_database()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -50,19 +74,21 @@ def admin_required(f):
 
 from utils.manager import model_manager
 
-# Note: Models are now lazy-loaded by model_manager
-def load_models():
-    return model_manager.load_models()
-
-# التأكد من وجود المجلدات المطلوبة مسبقاً
-with app.app_context():
+def ensure_storage_dirs():
+    """Create storage directories if they are missing at runtime."""
+    os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['DATA_RAW_FOLDER'], exist_ok=True)
     os.makedirs(app.config['DATA_PROCESSED_FOLDER'], exist_ok=True)
 
+# التأكد من وجود المجلدات المطلوبة مسبقاً
+with app.app_context():
+    ensure_storage_dirs()
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 
 def secure_filename_arabic(filename):
     """
@@ -136,6 +162,8 @@ def logout():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
+        ensure_storage_dirs()
+
         if 'file' not in request.files:
             return jsonify({'error': 'لم يتم رفع أي ملف'}), 400
         
@@ -145,22 +173,17 @@ def upload_file():
         
         if file and allowed_file(file.filename):
             original_filename = file.filename
-            file_ext = os.path.splitext(original_filename)[1].lower()
             # Add timestamp to name to avoid collisions
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"{timestamp}_{secure_filename_arabic(original_filename)}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            if file_ext == ".csv":
-                df = pd.read_csv(filepath)
-            elif file_ext == ".xlsx":
-                df = pd.read_excel(filepath, engine="openpyxl")
-            elif file_ext == ".xls":
-                df = pd.read_excel(filepath, engine="xlrd")
-            else:
+            try:
+                df = read_uploaded_dataframe(filepath)
+            except Exception as e:
                 os.remove(filepath)
-                return jsonify({"error": f"Unsupported file format: {file_ext}"}), 400
+                return jsonify({"error": f"تعذر قراءة الملف المرفوع: {str(e)}"}), 400
             
             # Check limits for guests
             is_sliced = False
@@ -171,16 +194,23 @@ def upload_file():
                 if len(df) > limit:
                     df = df.head(limit)
                     is_sliced = True
-                    slice_message = f"تم تحليل أول {limit} تقييمات كعينة تجريبية. لمعاينة الملف كاملاً، تفضل بإنشاء حساب مجاني!"
+                    slice_message = f"سيتم تحليل أول {limit} تقييماً فقط كعينة تجريبية. لتحليل الملف كاملاً، أنشئ حساباً مجانياً!"
             
-            raw_path = os.path.join(app.config['DATA_RAW_FOLDER'], f'{datetime.now().strftime("%Y%m%d_%H%M%S")}_{filename}')
+            column_detection = detect_text_column(df)
+
+            # Save the (potentially sliced) dataframe as the raw file used for analysis
+            base_name = os.path.splitext(filename)[0]
+            raw_filename = f'{datetime.now().strftime("%Y%m%d_%H%M%S")}_{base_name}.csv'
+            raw_path = os.path.join(app.config['DATA_RAW_FOLDER'], raw_filename)
             df.to_csv(raw_path, index=False)
             
             return jsonify({
-                'success': True, 
-                'filename': filename, 
-                'rows': len(df), 
+                'success': True,
+                'filename': filename,
+                'raw_filename': raw_filename,
+                'rows': len(df),
                 'columns': list(df.columns),
+                'column_detection': column_detection,
                 'sliced': is_sliced,
                 'slice_message': slice_message
             })
@@ -190,18 +220,36 @@ def upload_file():
 
 @app.route('/analyze/<filename>', methods=['POST'])
 def analyze_file(filename):
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    ensure_storage_dirs()
+
+    # Prefer the pre-sliced raw CSV (saved during upload) so guests are limited correctly.
+    # The client now sends raw_filename; fall back to the original upload if not provided.
+    raw_filename = request.args.get('raw_filename', '').strip()
+    if raw_filename:
+        filepath = os.path.join(app.config['DATA_RAW_FOLDER'], raw_filename)
+    else:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
     if not os.path.exists(filepath):
         return jsonify({'error': 'الملف غير موجود'}), 404
-        
-    if filename.endswith('.csv'):
-        df = pd.read_csv(filepath)
+    try:
+        df = read_uploaded_dataframe(filepath)
+    except Exception as e:
+        return jsonify({'error': f'تعذر قراءة الملف: {str(e)}'}), 400
+
+    requested_column = request.args.get('text_column', '').strip()
+    if requested_column and requested_column in df.columns:
+        text_column = requested_column
     else:
-        df = pd.read_excel(filepath)
-    
-    text_column = next((col for col in ['text', 'review', 'comment', 'نص', 'تقييم'] if col in df.columns), None)
+        detection = detect_text_column(df)
+        text_column = detection['selected']
+
     if text_column is None:
-        return jsonify({'error': 'لم يتم العثور على عمود النص في الملف'}), 400
+        return jsonify({
+            'error': 'لم نتمكن من تحديد عمود التعليقات تلقائيًا. اختر العمود المناسب قبل بدء التحليل.',
+            'columns': list(df.columns),
+            'column_detection': detect_text_column(df),
+        }), 400
     
     # === تنظيف البيانات قبل التحليل ===
     df = df.dropna(subset=[text_column])
@@ -212,15 +260,14 @@ def analyze_file(filename):
     if not texts:
         return jsonify({'error': 'الملف لا يحتوي على أي نصوص صالحة للتحليل بعد التنظيف'}), 400
     
-    force_local = request.args.get('force_local') == 'true'
-    # اختيار الموديل من المستخدم: multitask | gemini | local
-    selected_model = request.args.get('model', 'local')
+    force_arasant = request.args.get('force_arasant') == 'true'
+    # اختيار الموديل من المستخدم: arasant | gemini
+    selected_model = request.args.get('model', 'arasant')
     provider = selected_model
 
     # === نظام التخزين المؤقت الذكي (Smart Cashing) ===
     # ندمج كل النصوص مع اسم الموديل المختار ليكون البصمة فريدة لكل ملف+موديل
-    content_to_hash = "".join(texts) + "_" + selected_model
-    file_hash = hashlib.sha256(content_to_hash.encode('utf-8')).hexdigest()
+    file_hash = build_analysis_cache_key(texts, selected_model)
     
     # الـ base_name الجديد لكل العمليات هو الـ Hash 
     base_name = file_hash
@@ -253,22 +300,41 @@ def analyze_file(filename):
             
             # تسجيل العملية في History كـ (إعادة اطلاع) بدون إعادة تحليل
             if current_user.is_authenticated:
-                # نحفظ السجل حتى تظهر في قائمة تاريخ المستخدم
-                history_record = AnalysisHistory(
-                    user_id=current_user.id,
-                    original_filename=os.path.splitext(filename)[0],
-                    internal_filename=base_name,
-                    model_used=provider,
-                    total_reviews=stats['total_reviews'],
-                    positive_count=stats['sentiment_distribution']['إيجابي'],
-                    negative_count=stats['sentiment_distribution']['سلبي'],
-                    neutral_count=stats['sentiment_distribution']['محايد']
-                )
-                db.session.add(history_record)
-                db.session.commit()
+                try:
+                    # Check if THIS user already has this analysis in their history
+                    existing_record = AnalysisHistory.query.filter_by(
+                        user_id=current_user.id,
+                        internal_filename=base_name
+                    ).first()
+
+                    if not existing_record:
+                        history_record = AnalysisHistory(
+                            user_id=current_user.id,
+                            original_filename=os.path.splitext(filename)[0],
+                            internal_filename=base_name,
+                            model_used=provider,
+                            total_reviews=stats['total_reviews'],
+                            positive_count=stats['sentiment_distribution']['إيجابي'],
+                            negative_count=stats['sentiment_distribution']['سلبي'],
+                            neutral_count=stats['sentiment_distribution']['محايد']
+                        )
+                        db.session.add(history_record)
+                        db.session.commit()
+                        print(f"Added missing History record for user {current_user.id} on cache-hit")
+                except Exception as history_error:
+                    db.session.rollback()
+                    print(f"History save error on cache-hit: {str(history_error)}")
                 
-            return jsonify({'success': True, 'results': results, 'stats': stats, 'cached': True, 'base_name': base_name})
+            return jsonify({
+                'success': True,
+                'results': results,
+                'stats': stats,
+                'cached': True,
+                'base_name': base_name,
+                'text_column': text_column,
+            })
         except Exception as e:
+            db.session.rollback()
             print(f"Cache Reading Error: {e}, proceeding to re-analyze")
             # If cache is corrupt, proceed to re-analyze
 
@@ -278,21 +344,21 @@ def analyze_file(filename):
     results = []
 
     # مسار 1: الموديل متعدد المهام الجديد
-    if selected_model == 'multitask':
+    if selected_model == 'arasant':
         try:
             from utils.manager import model_manager
-            if not getattr(model_manager, 'multitask_analyzer', None):
-                if not model_manager.load_multitask():
-                    return jsonify({'error': 'ملفات الموديل الجديد (MultiTask) غير موجودة في الخادم. يرجى التأكد من رفع مجلد الموديل.'}), 500
+            if not getattr(model_manager, 'arasant_analyzer', None):
+                if not model_manager.load_arasant_model():
+                    return jsonify({'error': 'ملفات موديل AraSent غير موجودة في الخادم. يرجى التأكد من رفع مجلد الموديل.'}), 500
             
-            if getattr(model_manager, 'multitask_analyzer', None) and model_manager.multitask_analyzer.model is not None:
-                results = model_manager.analyze_batch_multitask(texts)
-                provider = 'local_multitask'
+            if getattr(model_manager, 'arasant_analyzer', None) and model_manager.arasant_analyzer.model is not None:
+                results = model_manager.analyze_batch_arasant(texts)
+                provider = 'arasant_local'
             else:
-                return jsonify({'error': 'ملفات الموديل الجديد (MultiTask) غير موجودة أو تالفة.'}), 500
+                return jsonify({'error': 'ملفات موديل AraSent غير موجودة أو تالفة.'}), 500
         except Exception as e:
-            print(f"Multitask Analysis Error: {e}")
-            return jsonify({'error': f'حدث خطأ أثناء تحميل موديل MultiTask: {str(e)}'}), 500
+            print(f"AraSent Model Error: {e}")
+            return jsonify({'error': f'حدث خطأ أثناء تحميل موديل AraSent: {str(e)}'}), 500
 
     # مسار 2: Gemini
     elif selected_model == 'gemini' and current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key:
@@ -301,43 +367,60 @@ def analyze_file(filename):
             results = temp_analyzer.analyze_batch(texts)
             provider = 'gemini'
         except Exception as e:
-            print(f"Gemini Analysis Error: {e}")
-            return jsonify({'error': f'فشل الاتصال بـ Gemini المحترف: {str(e)}'}), 500
+            print(f"Gemini Analysis Error: {e}, falling back to AraSent local model...")
+            # Fallback to AraSent local
+            try:
+                from utils.manager import model_manager
+                if not getattr(model_manager, 'arasant_analyzer', None):
+                    model_manager.load_arasant_model()
+                results = model_manager.analyze_batch_arasant(texts)
+                provider = 'arasant_local_fallback'
+            except Exception as arasant_e:
+                return jsonify({'error': f'فشل Gemini وفشل الموديل المحلي أيضاً: {str(arasant_e)}'}), 500
 
-    # مسار 3: الموديل الكلاسيكي (الافتراضي و Fallback)
+    # مسار 3: AraSent كمسار افتراضي وFallback
     else:
-        from utils.manager import model_manager
-        if not (model_manager.preprocessor and model_manager.aspect_extractor and model_manager.sentiment_classifier):
-            if not model_manager.load_models():
-                return jsonify({'error': 'ملفات الموديلات المحلية الكلاسيكية غير موجودة في الخادم. يرجى التأكد من رفعها.'}), 500
-        
         try:
-            results = model_manager.analyze_batch(texts)
-            provider = 'local'
+            if not getattr(model_manager, 'arasant_analyzer', None):
+                if not model_manager.load_arasant_model(force=force_arasant):
+                    return jsonify({'error': 'ملفات موديل AraSent غير موجودة في الخادم. يرجى التأكد من رفع الموديل.'}), 500
+
+            if getattr(model_manager, 'arasant_analyzer', None) and model_manager.arasant_analyzer.model is not None:
+                results = model_manager.analyze_batch_arasant(texts)
+                provider = 'arasant_local'
+            else:
+                return jsonify({'error': 'موديل AraSent غير متاح أو تالف.'}), 500
         except Exception as e:
-            print(f"Classic Model Error: {e}")
-            return jsonify({'error': f'حدث خطأ في الموديل الكلاسيكي: {str(e)}'}), 500
+            print(f"AraSent Fallback Error: {e}")
+            return jsonify({'error': f'حدث خطأ أثناء تشغيل موديل AraSent: {str(e)}'}), 500
         
     # حفظ النتائج في CSV
     results_df = pd.DataFrame(results)
     results_df.to_csv(processed_path, index=False)
     
-    # ملخص تنفيذي (Gemini فقط)
-    if current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key:
+    # ملخص تنفيذي ديناميكي
+    if provider == 'gemini' and current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key:
         try:
             temp_analyzer = GeminiAnalyzer(current_user.gemini_api_key)
             summary_text = temp_analyzer.generate_executive_summary(results)
             with open(summary_path, 'w', encoding='utf-8') as f:
-                json.dump({'executive_summary': summary_text}, f, ensure_ascii=False)
+                json.dump({'executive_summary': summary_text, 'summary_source': 'gemini'}, f, ensure_ascii=False)
         except Exception as e:
             print(f"Executive Summary Generation failed: {e}")
+            summary_text = AnalysisReportingService.generate_local_executive_summary(results)
+            with open(summary_path, 'w', encoding='utf-8') as f:
+                json.dump({'executive_summary': summary_text, 'summary_source': 'arasant'}, f, ensure_ascii=False)
+    else:
+        summary_text = AnalysisReportingService.generate_local_executive_summary(results)
+        with open(summary_path, 'w', encoding='utf-8') as f:
+            json.dump({'executive_summary': summary_text, 'summary_source': 'arasant'}, f, ensure_ascii=False)
             
     stats = _calculate_stats(results)
     
     # === حفظ السجل في قاعدة البيانات (للمسجلين فقط) ===
     if current_user.is_authenticated:
         try:
-            # Check if this exact analysis already exists to avoid duplicates on refresh
+            # Check if this user already has this exact analysis in history
             existing_record = AnalysisHistory.query.filter_by(
                 user_id=current_user.id,
                 internal_filename=base_name
@@ -356,12 +439,19 @@ def analyze_file(filename):
                 )
                 db.session.add(history_record)
                 db.session.commit()
-                print(f"Saved AnalysisHistory for {base_name}")
+                print(f"Saved new AnalysisHistory for user {current_user.id}: {base_name}")
         except Exception as e:
-            print(f"Error saving analysis history: {e}")
+            print(f"Error saving analysis history: {str(e)}")
             db.session.rollback()
     
-    return jsonify({'success': True, 'results': results, 'stats': stats, 'base_name': base_name})
+    return jsonify({
+        'success': True,
+        'results': results,
+        'stats': stats,
+        'base_name': base_name,
+        'text_column': text_column,
+        'provider': provider
+    })
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -387,14 +477,23 @@ def delete_history(analysis_id):
         return jsonify({'success': False, 'error': 'غير مصرح'}), 403
         
     try:
-        # Delete associated files if they exist
-        processed_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.csv')
-        summary_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.json')
-        
-        if os.path.exists(processed_path):
-            os.remove(processed_path)
-        if os.path.exists(summary_path):
-            os.remove(summary_path)
+        # Only delete physical files if NO other history record uses this same hash
+        # (This is important for shared cache in multi-user environments)
+        other_uses = AnalysisHistory.query.filter(
+            AnalysisHistory.internal_filename == analysis.internal_filename,
+            AnalysisHistory.id != analysis.id
+        ).first()
+
+        if not other_uses:
+            processed_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.csv')
+            summary_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{analysis.internal_filename}.json')
+            
+            if os.path.exists(processed_path):
+                os.remove(processed_path)
+            if os.path.exists(summary_path):
+                os.remove(summary_path)
+        else:
+            print(f"Skipping file deletion for {analysis.internal_filename} as it is used by other records.")
             
         db.session.delete(analysis)
         db.session.commit()
@@ -417,14 +516,7 @@ def admin():
     return render_template('admin.html', guest_limit=limit_setting.value)
 
 def _calculate_stats(results):
-    return {
-        'total_reviews': len(results),
-        'sentiment_distribution': {
-            'إيجابي': sum(1 for r in results if r.get('overall_sentiment') == 'إيجابي'),
-            'سلبي': sum(1 for r in results if r.get('overall_sentiment') == 'سلبي'),
-            'محايد': sum(1 for r in results if r.get('overall_sentiment', 'محايد') == 'محايد')
-        }
-    }
+    return AnalysisReportingService.calculate_stats(results)
 
 @app.route('/results/<base_name>')
 def get_results(base_name):
@@ -453,7 +545,9 @@ def get_results(base_name):
                     'provider': row.get('provider', 'cached')
                 })
             stats = _calculate_stats(results)
-            return jsonify({'success': True, 'results': results, 'stats': stats})
+            # Get the provider from the first result if available
+            provider = results[0].get('provider') if results else 'unknown'
+            return jsonify({'success': True, 'results': results, 'stats': stats, 'provider': provider})
         except Exception as e:
             return jsonify({'success': False, 'error': f"Error reading cached results: {e}"}), 500
     
@@ -513,8 +607,36 @@ def download_file(filename):
     
     if not os.path.exists(filepath):
         return jsonify({'error': 'الملف غير موجود'}), 404
-    
-    return send_file(filepath, as_attachment=True)
+
+    df_cached = pd.read_csv(filepath)
+    results = []
+    for _, row in df_cached.iterrows():
+        try:
+            aspects_raw = row.get('aspects', '[]')
+            aspects = ast.literal_eval(aspects_raw) if isinstance(aspects_raw, str) else aspects_raw
+        except Exception:
+            aspects = []
+
+        results.append({
+            'original_text': row.get('original_text', ''),
+            'cleaned_text': row.get('cleaned_text', ''),
+            'aspects': aspects,
+            'overall_sentiment': row.get('overall_sentiment', 'محايد'),
+            'confidence': float(row.get('confidence', 0.0) or 0.0),
+            'logic_explanation': row.get('logic_explanation', ''),
+            'provider': row.get('provider', ''),
+        })
+
+    summary_path = os.path.join(app.config['DATA_PROCESSED_FOLDER'], f'analyzed_{base_name}.json')
+    summary_text = AnalysisReportingService.load_summary_text(summary_path, results)
+    temp_file_path, download_name = AnalysisReportingService.export_results_to_excel(results, summary_text, base_name)
+
+    return send_file(
+        temp_file_path,
+        as_attachment=True,
+        download_name=download_name,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 
 @app.route('/about')

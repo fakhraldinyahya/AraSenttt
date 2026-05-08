@@ -27,89 +27,128 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-5 mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="text-center mb-5 fade-in">
-                <h1 class="fw-bold text-saudi display-5">ابدأ التحليل الآن</h1>
-                <p class="text-muted fs-5">ارفع ملف التقييمات وسنتولى استخراج الرؤى العميقة فوراً</p>
-            </div>
+<section class="admin-section py-5"
+    style="background: linear-gradient(var(--bg-gradient-end) 0%,var(--bg-gradient-mid) 50%,var(--bg-gradient-start) 100%) !important">
 
-            <div class="card p-4 shadow-sm mb-4 fade-in">
-                <form id="uploadForm">
-                    <div class="upload-zone mb-4" onclick="document.getElementById('fileInput').click()">
-                        <i class="fas fa-cloud-arrow-up fa-4x"></i>
-                        <h4 class="fw-bold">اضغط للاختيار أو اسحب الملف هنا</h4>
-                        <p class="text-muted">CSV, XLSX, XLS (بحد أقصى 16 ميجابايت)</p>
-                        <input type="file" id="fileInput" name="file" accept=".csv,.xlsx,.xls" style="display: none;">
-                    </div>
+    <div class="container py-5 mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-4 fade-in">
+                    <h1 class="fw-bold text-saudi display-5">بدء رحلة التحليل الذكي</h1>
+                    <p class="text-muted fs-5">أرفق ملف البيانات وسيقوم النظام بتحديد عمود التعليقات تلقائيًا قبل بدء
+                        التحليل.</p>
+                </div>
 
-                    <div id="filePreview" class="alert alert-primary d-flex align-items-center justify-content-between"
-                        style="display: none !important;">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-file-excel fa-2x me-3"></i>
-                            <div>
-                                <h6 id="fileNameDisplay" class="mb-0 fw-bold">filename.xlsx</h6>
-                                <small id="fileSizeDisplay">0 KB</small>
+                <div class="card p-4 shadow-sm mb-4 fade-in">
+                    <form id="uploadForm">
+                        <div class="upload-zone mb-4" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-cloud-arrow-up fa-4x"></i>
+                            <h4 class="fw-bold">اضغط للاختيار أو اسحب الملف هنا</h4>
+                            <p class="text-muted">CSV, XLSX, XLS (بحد أقصى 16 ميجابايت)</p>
+                            <input type="file" id="fileInput" name="file" accept=".csv,.xlsx,.xls"
+                                style="display: none;">
+                        </div>
+
+                        <div id="filePreview"
+                            class="alert alert-primary d-flex align-items-center justify-content-between"
+                            style="display: none !important;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-excel fa-2x me-3"></i>
+                                <div>
+                                    <h6 id="fileNameDisplay" class="mb-0 fw-bold">filename.xlsx</h6>
+                                    <small id="fileSizeDisplay">0 KB</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" onclick="resetFile()"></button>
+                        </div>
+
+                        <div id="columnDetectionCard" class="alert alert-light border mt-3" style="display: none;">
+                            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                                <div>
+                                    <h6 class="fw-bold text-saudi mb-1">العمود الذي سيُحلَّل</h6>
+                                    <p id="columnDetectionSummary" class="mb-2 text-muted small">سنفحص الملف لتحديد عمود
+                                        التعليقات تلقائيًا.</p>
+                                </div>
+                                <span class="badge rounded-pill text-bg-secondary" id="columnDetectionBadge">بانتظار
+                                    الفحص</span>
+                            </div>
+
+                            <div class="mt-3">
+                                <label for="textColumnSelect" class="form-label fw-bold">اختر عمود النص أو
+                                    التعليق</label>
+                                <select id="textColumnSelect" class="form-select" dir="rtl"></select>
+                                <div id="columnDetectionHint" class="form-text text-end"></div>
+                            </div>
+
+                            <div class="mt-3">
+                                <div class="small fw-bold mb-2 text-muted">الأعمدة المرشحة:</div>
+                                <div id="columnCandidateList" class="d-flex flex-wrap gap-2"></div>
                             </div>
                         </div>
-                        <button type="button" class="btn-close" onclick="resetFile()"></button>
-                    </div>
 
-                    <div class="mb-4 mt-3 text-end" id="modelSelection" style="display: none;">
-                        <label class="form-label fw-bold text-saudi">اختر طريقة التحليل:</label>
-                        <select id="modelChoice" class="form-select form-select-lg" dir="rtl">
-                            <option value="local">١. موديلات BERT الكلاسيكية (المسار السابق - افتراضي)</option>
-                            <option value="multitask">٢. الموديل الجديد المدمج (Multi-Task - أسرع وأشمل)</option>
-                            {% if current_user.is_authenticated and current_user.use_gemini and current_user.gemini_api_key %}
-                            <option value="gemini">٣. الذكاء الاصطناعي (Gemini AI)</option>
-                            {% endif %}
-                        </select>
-                        <div class="form-text mt-2 text-muted text-end">
-                            <i class="fas fa-info-circle"></i> الموديل المدمج يحلل 7 فئات بمرور واحد بدقة أعلى.
+                        <div class="mb-4 mt-3 text-end" id="modelSelection" style="display: none;">
+                            <label class="form-label fw-bold text-saudi">اختر طريقة التحليل:</label>
+                            <select id="modelChoice" class="form-select form-select-lg" dir="rtl">
+                                <option value="arasant">1. موديل AraSent المحلي (افتراضي)</option>
+                                {% if current_user.is_authenticated and current_user.use_gemini and
+                                current_user.gemini_api_key %}
+                                <option value="gemini">2. الذكاء الاصطناعي (Gemini AI)</option>
+                                {% endif %}
+                            </select>
+                            <div class="form-text mt-2 text-muted text-end">
+                                <i class="fas fa-info-circle"></i> موديل AraSent المحلي هو الخيار الافتراضي للتحليل
+                                ويحلل 7 فئات بمرور واحد.
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-saudi btn-lg w-100 py-3 fw-bold" id="uploadBtn">
+                                <i class="fas fa-magic me-2"></i> بدء عملية التحليل
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="progressSection" class="mt-5" style="display: none;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span id="progressStatus" class="fw-bold">جاري الرفع...</span>
+                            <span id="progressPercent" class="text-primary fw-bold">0%</span>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            <div id="progressBar"
+                                class="progress-bar progress-bar-striped progress-bar-animated progress-bar-saudi"
+                                style="width: 0%"></div>
                         </div>
                     </div>
 
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-saudi btn-lg w-100 py-3 fw-bold" id="uploadBtn">
-                            <i class="fas fa-magic me-2"></i> بدء عملية التحليل
-                        </button>
-                    </div>
-                </form>
-
-                <div id="progressSection" class="mt-5" style="display: none;">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span id="progressStatus" class="fw-bold">جاري الرفع...</span>
-                        <span id="progressPercent" class="text-primary fw-bold">0%</span>
-                    </div>
-                    <div class="progress" style="height: 12px;">
-                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated progress-bar-saudi"
-                            style="width: 0%"></div>
+                    <div id="errorAlert" class="alert alert-danger mt-4" style="display: none;">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <span id="errorText"></span>
                     </div>
                 </div>
 
-                <div id="errorAlert" class="alert alert-danger mt-4" style="display: none;">
-                    <i class="fas fa-exclamation-triangle me-2"></i> <span id="errorText"></span>
-                </div>
-            </div>
-
-            <div class="card p-3 bg-light border-0 fade-in">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-info-circle text-saudi me-3 fa-lg"></i>
-                    <p class="mb-0 small text-muted">عملية التحليل تعتمد على تقنية **Batch Processing** لضمان أسرع وقت
-                        معالجة ممكن لآلاف السطور.</p>
+                <div class="card p-3 bg-light border-0 fade-in">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle text-saudi me-3 fa-lg"></i>
+                        <p class="mb-0 small text-muted">قبل التحليل سيعرض النظام العمود الذي اكتشفه تلقائيًا، ويمكنك
+                            تغييره يدويًا إذا كانت أسماء الأعمدة غير قياسية.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     const fileInput = document.getElementById('fileInput');
+    const columnDetectionCard = document.getElementById('columnDetectionCard');
+    const textColumnSelect = document.getElementById('textColumnSelect');
+    const columnCandidateList = document.getElementById('columnCandidateList');
+    const columnDetectionSummary = document.getElementById('columnDetectionSummary');
+    const columnDetectionHint = document.getElementById('columnDetectionHint');
+    const columnDetectionBadge = document.getElementById('columnDetectionBadge');
 
-    fileInput.addEventListener('change', function (e) {
+    fileInput.addEventListener('change', function () {
         if (this.files && this.files[0]) {
             const file = this.files[0];
             document.getElementById('fileNameDisplay').textContent = file.name;
@@ -120,21 +159,118 @@
         }
     });
 
+    function resetColumnDetection() {
+        columnDetectionCard.style.display = 'none';
+        textColumnSelect.innerHTML = '';
+        columnCandidateList.innerHTML = '';
+        columnDetectionSummary.textContent = 'سنفحص الملف لتحديد عمود التعليقات تلقائيًا.';
+        columnDetectionHint.textContent = '';
+        columnDetectionBadge.textContent = 'بانتظار الفحص';
+        columnDetectionBadge.className = 'badge rounded-pill text-bg-secondary';
+    }
+
     function resetFile() {
         fileInput.value = '';
         document.getElementById('filePreview').setAttribute('style', 'display: none !important');
         document.getElementById('modelSelection').style.display = 'none';
+        document.getElementById('progressSection').style.display = 'none';
+        document.getElementById('errorAlert').style.display = 'none';
+        resetColumnDetection();
         document.querySelector('.upload-zone').style.display = 'block';
+    }
+
+    function renderColumnDetection(columns = [], detection = {}) {
+        const candidates = detection.candidates || [];
+        const selectedColumn = detection.selected || (columns.length ? columns[0] : '');
+        const requiresManual = Boolean(detection.requires_manual_selection);
+
+        textColumnSelect.innerHTML = '';
+        columns.forEach((column) => {
+            const option = document.createElement('option');
+            option.value = column;
+            option.textContent = column;
+            option.selected = column === selectedColumn;
+            textColumnSelect.appendChild(option);
+        });
+
+        columnCandidateList.innerHTML = '';
+        candidates.forEach((candidate) => {
+            const badge = document.createElement('span');
+            badge.className = 'badge rounded-pill text-bg-light border text-dark';
+            badge.textContent = `${candidate.name} (${candidate.score})`;
+            if (candidate.reason) {
+                badge.title = candidate.reason;
+            }
+            columnCandidateList.appendChild(badge);
+        });
+
+        columnDetectionSummary.textContent = requiresManual
+            ? 'لم نحدد عمود التعليقات بشكل قاطع. اختر العمود المناسب قبل بدء التحليل.'
+            : `تم اكتشاف العمود الأقرب للتعليقات تلقائيًا: ${selectedColumn}`;
+
+        columnDetectionHint.textContent = candidates.length
+            ? `سبب الترشيح: ${(candidates[0] && candidates[0].reason) || 'مطابقة اسم العمود ومحتواه'}`
+            : 'سيظهر سبب اختيار العمود بعد فحص الملف.';
+
+        columnDetectionBadge.textContent = requiresManual ? 'اختيار يدوي' : 'تم الاكتشاف تلقائيًا';
+        columnDetectionBadge.className = `badge rounded-pill ${requiresManual ? 'text-bg-warning' : 'text-bg-success'}`;
+        columnDetectionCard.style.display = columns.length ? 'block' : 'none';
+    }
+
+    async function confirmTextColumnChoice(uploadData) {
+        const columns = uploadData.columns || [];
+        const detection = uploadData.column_detection || {};
+
+        renderColumnDetection(columns, detection);
+
+        if (!columns.length) {
+            throw new Error('لم يتم العثور على أعمدة داخل الملف.');
+        }
+
+        const inputOptions = {};
+        columns.forEach((column) => {
+            inputOptions[column] = column;
+        });
+
+        const result = await Swal.fire({
+            title: detection.requires_manual_selection ? 'اختر عمود التعليقات' : 'العمود المقترح للتحليل',
+            text: detection.requires_manual_selection
+                ? 'لم نحدد العمود المناسب بشكل قاطع، لذلك اختر العمود الذي يحتوي على النصوص أو التعليقات.'
+                : 'اكتشفنا العمود الأقرب للتعليقات تلقائيًا. يمكنك تغييره قبل بدء التحليل.',
+            input: 'select',
+            inputOptions,
+            inputValue: detection.selected || columns[0],
+            inputPlaceholder: 'اختر العمود',
+            showCancelButton: true,
+            confirmButtonText: 'بدء التحليل',
+            cancelButtonText: 'إلغاء',
+            confirmButtonColor: '#198754',
+            inputValidator: (value) => value ? undefined : 'اختر عمودًا للمتابعة'
+        });
+
+        if (!result.isConfirmed) {
+            throw new Error('تم إلغاء عملية التحليل.');
+        }
+
+        renderColumnDetection(columns, {
+            ...detection,
+            selected: result.value,
+            requires_manual_selection: false,
+        });
+
+        textColumnSelect.value = result.value;
+        return result.value;
     }
 
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const file = fileInput.files[0];
-        if (!file) { alert('برجاء اختيار ملف'); return; }
-        
-        // جلب اختيار الموديل من القائمة
-        const selectedModel = document.getElementById('modelChoice') ? document.getElementById('modelChoice').value : 'local';
+        if (!file) {
+            alert('برجاء اختيار ملف');
+            return;
+        }
 
+        const selectedModel = document.getElementById('modelChoice') ? document.getElementById('modelChoice').value : 'arasant';
         const formData = new FormData();
         formData.append('file', file);
 
@@ -145,27 +281,31 @@
             updateProgress(30, 'جاري رفع الملف...');
             const uploadRes = await fetch('/upload', { method: 'POST', body: formData });
             const uploadData = await uploadRes.json();
-            if (!uploadData.success) throw new Error(uploadData.error);
-            
+            if (!uploadData.success) {
+                throw new Error(uploadData.error);
+            }
+
             if (uploadData.sliced) {
-                // عرض تنبيه لطيف للمستخدم أن الملف تم اقتطاعه
                 await Swal.fire({
-                    title: 'عينة تجريبية 🎁',
+                    title: 'عينة تجريبية',
                     text: uploadData.slice_message,
                     icon: 'info',
-                    confirmButtonText: 'حسناً، أرني النتيجة',
+                    confirmButtonText: 'متابعة',
                     confirmButtonColor: '#28a745'
                 });
             }
 
+            const selectedTextColumn = await confirmTextColumnChoice(uploadData);
+
             updateProgress(65, 'جاري تحليل البيانات باستخدام الذكاء الاصطناعي...');
-            // تمرير الموديل المختار كـ query parameter
-            const analyzeRes = await fetch(`/analyze/${uploadData.filename}?model=${selectedModel}`, { method: 'POST' });
+            const rawParam = uploadData.raw_filename ? `&raw_filename=${encodeURIComponent(uploadData.raw_filename)}` : '';
+            const analyzeRes = await fetch(`/analyze/${uploadData.filename}?model=${selectedModel}&text_column=${encodeURIComponent(selectedTextColumn)}${rawParam}`, {
+                method: 'POST'
+            });
             const analyzeData = await analyzeRes.json();
 
             if (!analyzeData.success) {
                 if (analyzeData.error_type === 'provider_error') {
-                    // Redirect to dashboard anyway, it will show the fallback modal there
                     updateProgress(100, 'تنبيه في مزود التحليل، يتم الانتقال...');
                     setTimeout(() => window.location.href = `/dashboard/${analyzeData.base_name}`, 1000);
                     return;
@@ -174,9 +314,7 @@
             }
 
             updateProgress(100, 'اكتمل التحليل!');
-            // التعديل هنا: يجب التوجيه لـ base_name (الهاش) وليس لاسم الملف الأصلي
             setTimeout(() => window.location.href = `/dashboard/${analyzeData.base_name}`, 800);
-
         } catch (err) {
             document.getElementById('errorText').textContent = err.message;
             document.getElementById('errorAlert').style.display = 'block';

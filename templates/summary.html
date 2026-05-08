@@ -53,6 +53,8 @@
 {% endblock %}
 
 {% block content %}
+<section class="py-5 shadow-sm" style="background:linear-gradient(var(--bg-gradient-end) 0%,var(--bg-gradient-mid) 10%,var(--bg-gradient-start) 50%) !important">
+
 <div class="container py-5 mt-4">
     {% if error %}
     <div class="card p-5 text-center border-0 shadow-sm fade-in">
@@ -110,27 +112,26 @@
                 {% else %}
                 <div class="text-center py-5">
                     <i class="fas fa-robot fa-3x text-muted mb-3 opacity-25"></i>
-                    <p class="text-muted">قم بتفعيل Gemini في الإعدادات للحصول على تحليل متقدم وملخص تنفيذي ذكي هنا.</p>
+                    <p class="text-muted">لم يتمكن النظام من توليد الملخص التنفيذي لهذا التحليل حالياً.</p>
                 </div>
                 {% endif %}
             </div>
         </div>
 
-        <div class="col-lg-4 fade-in" style="animation-delay: 0.2s;">
+        <div class="col-lg-4 fade-in align-self-start" style="animation-delay: 0.2s;">
             <div
-                class="card p-5 h-100 bg-primary text-white border-0 shadow-lg text-center d-flex flex-column justify-content-center"
-                style="background-color: var(--primary-green) !important;">
+                class="card p-5 border-0 shadow-lg text-center">
                 <div class="mb-4">
                     <i class="fas fa-file-pdf fa-4x opacity-50"></i>
                 </div>
                 <h4 class="fw-bold mb-4">تقرير جاهز لاتخاذ القرار</h4>
-                <p class="opacity-90 mb-5">تم استخراج هذا الملخص باستخدام أحدث نماذج معالجة اللغة الطبيعية (NLP)
-                    المتخصصة في النصوص العربية.</p>
+                <p class="opacity-90 mb-5">تم استخراج هذا الملخص اعتماداً على نتائج التحليل الفعلية، سواء عبر Gemini أو
+                    عبر موديل AraSent المحلي.</p>
                 <div class="d-grid gap-3">
-                    <a href="/dashboard/{{ filename }}" class="btn btn-light fw-bold py-3 px-4 rounded-pill shadow">
+                    <a href="/dashboard/{{ filename }}" class="btn btn-gold fw-bold py-3 px-4 rounded-pill shadow">
                         <i class="fas fa-chart-line me-2"></i> العودة للتحليلات
                     </a>
-                    <a href="/download/{{ filename }}" class="btn btn-outline-light py-3 px-4 rounded-pill">
+                    <a href="/download/{{ filename }}" class="btn btn-white py-3 px-4 rounded-pill">
                         <i class="fas fa-download me-2"></i> تصدير البيانات
                     </a>
                 </div>
@@ -139,4 +140,5 @@
     </div>
     {% endif %}
 </div>
+</section>
 {% endblock %}
